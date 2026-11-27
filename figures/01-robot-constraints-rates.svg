@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="330" viewBox="0 0 820 330">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">一台机器人上同时跑着好几种频率</text>
+<text x="16.0" y="320.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">模型推理不用和控制一样快：动作块一次给几十步，控制器按自己的节拍一步步执行。</text>
+<line x1="300.0" y1="62.0" x2="300.0" y2="290.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="300.0" y="306.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">1 Hz</text>
+<line x1="448.4" y1="62.0" x2="448.4" y2="290.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="448.4" y="306.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">10 Hz</text>
+<line x1="596.9" y1="62.0" x2="596.9" y2="290.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="596.9" y="306.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">100 Hz</text>
+<line x1="745.3" y1="62.0" x2="745.3" y2="290.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="745.3" y="306.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">1000 Hz</text>
+<text x="20.0" y="84.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">关节力矩环</text>
+<text x="20.0" y="100.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal">底层控制器</text>
+<rect x="300.0" y="76.0" width="445.3" height="20.0" rx="4" fill="#16a34a" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="753.3" y="91.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">1000 Hz · 每 1 ms</text>
+<text x="20.0" y="128.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">GR00T N1 System 1</text>
+<text x="20.0" y="144.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal">出动作（L40）</text>
+<rect x="300.0" y="120.0" width="308.6" height="20.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="616.6" y="135.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">120 Hz · 每 8.33 ms</text>
+<text x="20.0" y="172.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">π0 动作执行</text>
+<text x="20.0" y="188.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal">控制器按块里的动作走</text>
+<rect x="300.0" y="164.0" width="252.2" height="20.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="560.2" y="179.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">50 Hz · 每 20 ms</text>
+<text x="20.0" y="216.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">GR00T N1 System 2</text>
+<text x="20.0" y="232.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal">VLM 看图想事（L40）</text>
+<rect x="300.0" y="208.0" width="148.4" height="20.0" rx="4" fill="#7c3aed" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="456.4" y="223.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">10 Hz · 每 100 ms</text>
+<text x="20.0" y="260.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">π0 模型推理</text>
+<text x="20.0" y="276.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal">每执行 25 步推理一次</text>
+<rect x="300.0" y="252.0" width="44.7" height="20.0" rx="4" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="352.7" y="267.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">2 Hz · 每 500 ms</text>
+<text x="545.0" y="324.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="middle" font-weight="normal">频率（对数刻度）</text>
+</svg>

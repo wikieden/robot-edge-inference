@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="230" viewBox="0 0 820 230">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">从拍照到动作发出：一条时延预算（各项是编的）</text>
+<text x="16.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">模型只是其中一段。相机最坏要等一整帧；实际要按 p99 实测，不能只看平均。</text>
+<rect x="40.0" y="70.0" width="196.5" height="44.0" rx="3" fill="#6b7280" stroke="#fff" stroke-width="1" opacity="0.8"/>
+<text x="138.2" y="97.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">等相机 33.3</text>
+<rect x="236.5" y="70.0" width="29.5" height="44.0" rx="3" fill="#0d9488" stroke="#fff" stroke-width="1" opacity="0.8"/>
+<line x1="251.2" y1="114.0" x2="251.2" y2="142.0" stroke="#6b7280" stroke-width="1"/>
+<text x="251.2" y="154.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">预处理 5</text>
+<rect x="266.0" y="70.0" width="430.7" height="44.0" rx="3" fill="#ea580c" stroke="#fff" stroke-width="1" opacity="0.8"/>
+<text x="481.3" y="97.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">模型推理 73</text>
+<rect x="696.7" y="70.0" width="11.8" height="44.0" rx="3" fill="#0d9488" stroke="#fff" stroke-width="1" opacity="0.8"/>
+<line x1="702.6" y1="114.0" x2="702.6" y2="142.0" stroke="#6b7280" stroke-width="1"/>
+<text x="702.6" y="154.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">后处理 2</text>
+<rect x="708.5" y="70.0" width="5.9" height="44.0" rx="3" fill="#16a34a" stroke="#fff" stroke-width="1" opacity="0.8"/>
+<line x1="711.4" y1="114.0" x2="711.4" y2="122.0" stroke="#6b7280" stroke-width="1"/>
+<text x="711.4" y="134.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal">发给控制器 1</text>
+<text x="724.4" y="97.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13" fill="#1f2937" text-anchor="start" font-weight="bold">合计 114.3 ms</text>
+</svg>

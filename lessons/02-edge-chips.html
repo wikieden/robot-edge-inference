@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 2 章 · 端侧芯片：看懂 Jetson 的三个数 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html" class="cur"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="2-jetson">第 2 章 · 端侧芯片：看懂 Jetson 的三个数</h1><div class="run"><a class="btn" href="../animations/02-edge-chips.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch02_edge_chips.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch02_edge_chips.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch02_edge_chips.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：给机器人挑一块计算板，数据表上那么多数字，先看哪几个？官方写的 275 TOPS 能直接拿来算吗？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/01-robot-constraints.html">第 1 章 机器人上的推理</a> · 下一章：<a href="../lessons/03-lower-bounds.html">第 3 章 先算下限</a><br />
+对应原文：NVIDIA 官方页面（2026-11-26 核对，地址和全部数字见 <a href="../lessons/appendix-sources.html">附录 · 材料来源</a>）：Jetson Thor 产品页、JetPack 6.2 Super Mode 博客（Table 2）、Jetson T4000 博客、AGX Orin 发布博客（2022）<br />
+本章缩写：SoC = System on Chip（片上 / 系统，CPU、GPU 等做在一块芯片上）· LPDDR = Low-Power Double Data Rate（低功耗 / 双倍 / 数据速率内存，手机和 Jetson 用的内存）· TOPS = Tera Operations Per Second（每秒万亿次运算）· TFLOPS = Tera Floating-point Operations Per Second（每秒万亿次浮点运算）· INT8 = 8-bit integer（8 位整数）· FP4 = 4-bit floating point（4 位浮点）· DLA = Deep Learning Accelerator（深度学习 / 加速器，Orin 上专跑卷积网络的小核）· ISP = Image Signal Processor（图像 / 信号 / 处理器，处理相机原始数据）· PCIe = Peripheral Component Interconnect Express（外设 / 部件 / 互联 / 高速版）· ROS 2 = Robot Operating System 2（机器人 / 操作 / 系统 第 2 版）· JetPack = NVIDIA 给 Jetson 的整套系统软件 · MAXN = NVIDIA 功率模式里"不限功率"那一档的名字（官方没给全称）· AGX = Jetson 高端型号的产品名（官方没给全称）。全部缩写见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：统一内存：一块内存大家共用（2026-11-26）</h3>
+<p><strong>类比：合租房的一个冰箱。</strong> 台式机像分开住：CPU 有自己的冰箱（主机内存），显卡有自己的冰箱（显存），东西要从一个搬到另一个（走 PCIe 拷贝）。Jetson 像合租：CPU、GPU、DLA、相机 ISP 共用一个大冰箱，谁都能直接拿，不用搬。</p>
+<p><img alt="台式机两块内存，Jetson 一块大家共用" src="../figures/02-edge-chips-unified-memory.png" /></p>
+<p><strong>两个后果</strong>：</p>
+<ol>
+<li><strong>好处</strong>：相机拍到的图，GPU 可以直接读，省掉一次拷贝。</li>
+<li><strong>代价</strong>：数据表上写的"64 GB"不全是模型的。系统、ROS 2、相机缓冲、日志都从这里拿。</li>
+</ol>
+<p><strong>例子</strong>（系统预留 3 GB 是编的，自己的机器要用 <code>tegrastats</code> 之类的工具实测）：</p>
+<table>
+<thead>
+<tr>
+<th>模组</th>
+<th>统一内存</th>
+<th>留给模型约</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin Nano 8GB</td>
+<td>8 GB</td>
+<td>5 GB</td>
+</tr>
+<tr>
+<td>Orin NX 16GB</td>
+<td>16 GB</td>
+<td>13 GB</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>64 GB</td>
+<td>61 GB</td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>128 GB</td>
+<td>125 GB</td>
+</tr>
+</tbody>
+</table>
+<p>8 GB 的板子扣掉预留只剩 5 GB 左右，这决定了它能放多大的模型（第 3 章第四步）。</p>
+<p><strong>一句话</strong>：Jetson 的内存 CPU 和 GPU 共用，省了拷贝，但数据表上的容量要先扣掉系统那份。</p>
+<h3 id="jetson-2026-11-26">第二步：一张表看 Jetson 全家（2026-11-26）</h3>
+<p>全部来自 NVIDIA 官方页面（<a href="../lessons/appendix-sources.html">附录 · 材料来源</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>模组</th>
+<th>内存</th>
+<th>带宽</th>
+<th>官方 AI 算力</th>
+<th>功率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin Nano 8GB（原版）</td>
+<td>8 GB</td>
+<td>68 GB/s</td>
+<td>40 INT8 TOPS（稀疏）</td>
+<td>7–15 W</td>
+</tr>
+<tr>
+<td>Orin Nano 8GB（Super）</td>
+<td>8 GB</td>
+<td>102 GB/s</td>
+<td>67 INT8 TOPS（稀疏）</td>
+<td>最高 25 W</td>
+</tr>
+<tr>
+<td>Orin NX 16GB（Super）</td>
+<td>16 GB</td>
+<td>102 GB/s</td>
+<td>157 INT8 TOPS（稀疏）</td>
+<td>10–40 W</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>64 GB</td>
+<td>204.8 GB/s</td>
+<td>275 INT8 TOPS（稀疏）</td>
+<td>15–60 W</td>
+</tr>
+<tr>
+<td>Jetson T4000</td>
+<td>64 GB</td>
+<td>273 GB/s</td>
+<td>1200 FP4 TFLOPS（稀疏）</td>
+<td>40–70 W</td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>128 GB</td>
+<td>273 GB/s</td>
+<td>2070 FP4 TFLOPS（稀疏）</td>
+<td>40–130 W</td>
+</tr>
+</tbody>
+</table>
+<p><strong>先看哪三个数</strong>：</p>
+<ol>
+<li><strong>内存容量</strong>：模型放不放得下（第 3 章第四步）；</li>
+<li><strong>内存带宽</strong>：batch = 1 时每生成一步要读一遍权重，带宽决定最快多快（第 3 章第二步）；</li>
+<li><strong>功率</strong>：电池和散热扛不扛得住（第 7 章）。</li>
+</ol>
+<p>AI 算力（TOPS）排在后面，因为它有好几层折扣，下一步讲。</p>
+<p><img alt="带宽和功率：越往右上越强，也越耗电" src="../figures/02-edge-chips-bw-power.png" /></p>
+<p><strong>一句话</strong>：挑板子先看容量、带宽、功率三个数，算力数字要打完折再用。</p>
+<h3 id="super-mode2026-11-26">第三步：算力的两层折扣，以及 Super Mode（2026-11-26）</h3>
+<p><strong>类比：超市的"最高省 50%"。</strong> 广告上的数是最好情况：只有指定商品、满足条件才有。官方 TOPS 也是这样。</p>
+<p><strong>第一层：稀疏 vs 稠密。</strong> Orin 的 TOPS 都是<strong>稀疏</strong>口径：假设权重里每 4 个数有 2 个是 0（叫 2:4 稀疏），硬件可以跳过它们，算力翻倍。普通训练出来的模型权重不是这样，所以要先<strong>打对折</strong>，叫<strong>稠密</strong>口径。AGX Orin：<span class="arithmatex">\(275 \div 2 = 137.5\)</span> INT8 TOPS（官方博客给的稠密值是 138）。</p>
+<p><strong>第二层：实际利用率。</strong> 峰值是所有计算单元每个时钟都在算。真实模型有搬数据、等同步、小算子，跑不满。<strong>例子</strong>（40% 是编的，实测才准）：<span class="arithmatex">\(137.5 \times 40\% = 55\)</span> TOPS。</p>
+<p><strong>第三层（Thor 要注意）：精度不同不能直接比。</strong> Thor 的 2070 是 <strong>FP4 稀疏 TFLOPS</strong>，Orin 是 INT8 稀疏 TOPS。精度越低，同一块硬件能报的数越大，所以 2070 和 275 不能直接相除。比较两块板子时，<strong>带宽</strong>的口径是一致的，可以直接比：273 ÷ 204.8 ≈ 1.33 倍。</p>
+<p><strong>Super Mode</strong>：Orin Nano 和 Orin NX 的 Super 是<strong>同一块硬件</strong>，靠 JetPack 6.2 提高频率和功率上限。Orin Nano 8GB：带宽 <span class="arithmatex">\(68 \to 102\)</span> GB/s（× 1.50），算力 <span class="arithmatex">\(40 \to 67\)</span>（× 1.68），功率上限 <span class="arithmatex">\(15 \to 25\)</span> W。看数据表时要分清写的是原版还是 Super。</p>
+<p><strong>一句话</strong>：官方 TOPS 先除以 2 换成稠密，再乘实际利用率；不同精度的数不能直接比，带宽可以。</p>
+<h3 id="2026-11-26_1">第四步：功率模式和每瓦带宽（2026-11-26）</h3>
+<p>Jetson 有几档<strong>功率模式</strong>，用 <code>nvpmodel</code> 切换。Orin NX 16GB（Super）官方列了 10 W、15 W、25 W、40 W 和 MAXN SUPER 几档。档位越低，频率越低，推理越慢，但电池撑得越久、发热越少。</p>
+<p><strong>每瓦换来多少带宽</strong>（按最高功率算）：</p>
+<table>
+<thead>
+<tr>
+<th>模组</th>
+<th>带宽 ÷ 最高功率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin Nano 8GB（原版）</td>
+<td>68 ÷ 15 = 4.53 GB/s 每瓦</td>
+</tr>
+<tr>
+<td>Orin Nano 8GB（Super）</td>
+<td>102 ÷ 25 = 4.08</td>
+</tr>
+<tr>
+<td>Orin NX 16GB（Super）</td>
+<td>102 ÷ 40 = 2.55</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>204.8 ÷ 60 = 3.41</td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>273 ÷ 130 = 2.10</td>
+</tr>
+</tbody>
+</table>
+<p>小板子每瓦更划算，但总量小，大模型放不下；Thor 每瓦不是最高，但容量和总带宽最大。选型是在"放得下、跑得够快、电扛得住"三者之间找平衡，第 8 章用一个完整例子走一遍。</p>
+<p><strong>其他平台</strong>：瑞芯微 RK3588、高通、地平线等也有带 NPU（Neural Processing Unit，神经网络处理器）的板子。本书没有核对它们的官方数据表，不列数字；选型时看同样三个数：容量、带宽、功率，再看工具链支不支持你的模型。</p>
+<p><strong>一句话</strong>：功率模式是用速度换电和热；小板子每瓦划算但放不下大模型，选型要三者一起看。</p>
+<h3 id="_2">动画演示：统一内存和打折后的算力</h3>
+<p><img alt="Jetson 的三个数" src="../animations/02-edge-chips.gif" /></p>
+<p>可交互版：<a href="../animations/02-edge-chips.html">animations/02-edge-chips.html</a>（滑块：实际利用率）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上面一条是 64 GB 统一内存，先被系统、ROS 2、相机拿走一块（第一步）；</li>
+<li>下面三根条：官方稀疏 275 → 稠密 137.5 → 乘利用率 40% ≈ 55（第三步）；</li>
+<li>拖滑块看利用率变化时，最后剩多少。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第三步 折扣）：Orin NX 16GB（Super）官方 157 INT8 TOPS（稀疏）。按稠密口径是多少？再按实际利用率 30% 算，大约还剩多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一步 统一内存）：一块 16 GB 的 Orin NX，系统和 ROS 2 占 3 GB，相机缓冲又占 1.5 GB。一个占 12 GB 的模型放得下吗？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第三步 精度）：为什么不能用"2070 ÷ 275 ≈ 7.5"说 Thor 比 AGX Orin 快 7.5 倍？用哪个数比更公平？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>内存大家一块用，先扣系统再算模型；<br />
+容量带宽加功率，挑板先看这三个；<br />
+稀疏先除二，再乘利用率；<br />
+精度不同不能比，带宽口径最老实。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p><a href="../review.html">E03</a>（官方 TOPS 怎么打折）、<a href="../review.html">E04</a>（挑板子先看哪三个数）</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ JetPack 6.2 Super Mode 博客</td>
+<td>Table 2（原版 vs Super 的带宽、稀疏 / 稠密 TOPS、DLA、功率模式）；见 <a href="../lessons/appendix-sources.html">附录 · 材料来源</a></td>
+<td>一张表看清 Orin Nano / NX 的口径</td>
+</tr>
+<tr>
+<td>Jetson Thor 产品页</td>
+<td>规格表；见 <a href="../lessons/appendix-sources.html">附录 · 材料来源</a></td>
+<td>Thor / T4000 的内存、带宽、FP4 算力、功率</td>
+</tr>
+<tr>
+<td>机器人软硬件架构 · 电气与计算</td>
+<td><a href="https://wikieden.github.io/robot-architecture/lessons/05-electrical-compute.html">robot-system-architecture 第 5 章</a></td>
+<td>主控、实时核、驱动板三种计算单元各管什么</td>
+</tr>
+<tr>
+<td>《深入理解 AI Infra》§4.6.3</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/04-加速器架构.md</code> L844 起</td>
+<td>Apple 统一内存的同类分析：容量和带宽怎么换算成模型运行能力</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>稀疏折扣</strong>：2:4 稀疏是每 4 个数里固定 2 个为 0，硬件跳过它们，报出来的算力是稠密的 2 倍。</li>
+<li><strong>利用率</strong>：实际算力 = 峰值 × 利用率，利用率要实测。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>稠密 <span class="arithmatex">\(=\)</span> 稀疏 <span class="arithmatex">\(\div 2\)</span></td>
+<td>官方 TOPS 换成稠密口径</td>
+</tr>
+<tr>
+<td>实际 <span class="arithmatex">\(=\)</span> 稠密 <span class="arithmatex">\(\times\)</span> 利用率</td>
+<td>真实能跑到的算力</td>
+</tr>
+<tr>
+<td>留给模型 <span class="arithmatex">\(=\)</span> 总内存 <span class="arithmatex">\(-\)</span> 预留</td>
+<td>统一内存里模型能用的部分</td>
+</tr>
+<tr>
+<td>每瓦带宽 <span class="arithmatex">\(=\)</span> 带宽 <span class="arithmatex">\(\div\)</span> 功率</td>
+<td>端侧的效率指标</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch02_edge_chips.py</code>，配套测试 <code>tests/test_chapters.py::test_ch02</code>，notebook 在 <code>notebooks/ch02_edge_chips.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch02_edge_chips.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch02</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（模组参数来自官方页面；系统预留 3 GB、利用率 40% 是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 留给模型的内存</td>
+<td>总内存 − 3</td>
+<td><code>usable_gb(64)</code></td>
+<td>61 GB</td>
+</tr>
+<tr>
+<td>第三步 稠密口径</td>
+<td>稀疏 ÷ 2</td>
+<td><code>dense(275)</code></td>
+<td>137.5</td>
+</tr>
+<tr>
+<td>第三步 实际算力</td>
+<td>稠密 × 40%</td>
+<td><code>effective(dense(275))</code></td>
+<td>55 TOPS</td>
+</tr>
+<tr>
+<td>第三步 Super Mode</td>
+<td>新 ÷ 旧</td>
+<td><code>102 / 68</code></td>
+<td>1.50 倍</td>
+</tr>
+<tr>
+<td>第四步 每瓦带宽</td>
+<td>带宽 ÷ 功率</td>
+<td><code>gbps_per_watt(204.8, 60)</code></td>
+<td>3.41 GB/s 每瓦</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def dense(sparse):
+    return sparse / 2                 # 官方稀疏口径打对折
+
+def effective(dense_peak, util=0.4):
+    return dense_peak * util          # 再乘实际利用率（40% 是编的，要实测）
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li><code>MODULES</code> 里每一行都带着"算力口径"字段：INT8 稀疏 TOPS 和 FP4 稀疏 TFLOPS 混在一张表里时，不带口径的数字很容易被拿来直接相除。</li>
+<li>功率用的是官方写的最高功率；实际跑的档位往往更低，每瓦带宽要按你用的档位重算。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>usable_gb</code> 的预留从 3 GB 改成 5 GB（再开一个大日志进程），看 8 GB 板子还剩多少。</li>
+<li>把利用率改成 25%，看 AGX Orin 实际只剩多少 TOPS。</li>
+</ul><nav class="pager"><a href="01-robot-constraints.html">← 第 1 章 · 机器人上的推理：和云上有什么不同</a><a href="03-lower-bounds.html">第 3 章 · 先算下限：读权重要多久、算一遍要多久、放不放得下 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 6 章 · 实时调度：动作块、异步推理、快慢两套系统 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html" class="cur"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="6">第 6 章 · 实时调度：动作块、异步推理、快慢两套系统</h1><div class="run"><a class="btn" href="../animations/06-realtime-scheduling.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch06_realtime_scheduling.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch06_realtime_scheduling.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch06_realtime_scheduling.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：推理比控制周期慢得多，机器人怎么做到动作不卡？同步执行和异步执行差在哪？从拍照到电机动起来，时间都花在哪？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/05-inference-engines.html">第 5 章 推理引擎</a> · 下一章：<a href="../lessons/07-power-and-cloud.html">第 7 章 功耗与端云分工</a><br />
+对应原文：<code>vla-deep-dive/materials/text/papers/smolvla-2506.01844.txt</code> §3.3 L300–L392（异步推理、阈值 g）；<code>pi0-2410.24164.txt</code> L938–L940（每执行 25 步推理一次）；<code>gr00t-n1-2503.14734.txt</code> L78–L89（System 2 10 Hz、System 1 120 Hz）；<code>real-time-chunking-2506.07339.txt</code>（RTC，讲义见 <a href="https://wikieden.github.io/vla-from-scratch/lessons/13-rtc.html">vla-deep-dive 第 13 章</a>）<br />
+本章缩写：sync / async = synchronous / asynchronous（同步 / 异步）· RTC = Real-Time Chunking（实时 / 分块）· p99 = 99th percentile（第 99 百分位：100 次里最慢的那 1 次左右）· fps = frames per second（每秒帧数）· jitter = 抖动（每次耗时不一样）· NITROS = NVIDIA Isaac Transport for ROS（Isaac ROS 的零拷贝传输）· 其余见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：同步执行：做完一块，停下来等（2026-11-26）</h3>
+<p><strong>类比：一个厨师又切菜又看菜谱。</strong> 切完手上这批菜，停下来翻下一页菜谱，翻完再切。翻菜谱的时间，刀是停着的。</p>
+<p>同步执行就是这样：机器人执行完 <span class="arithmatex">\(E\)</span> 步动作后，拍一张照、发起推理，<strong>推理期间不动</strong>，新的动作块回来才继续。</p>
+<div class="arithmatex">\[
+\text{停着的比例} = \frac{L}{L + E \times \Delta t}
+\]</div>
+<ul>
+<li><span class="arithmatex">\(L\)</span>：一次推理的时间（latency）；</li>
+<li><span class="arithmatex">\(E\)</span>：每轮执行多少步再推理（π0 是 25 步）；</li>
+<li><span class="arithmatex">\(\Delta t\)</span>：控制周期，读作"delta t"（50 Hz 时是 20 ms）。</li>
+</ul>
+<p><strong>算一遍</strong>（π0 的设置：<span class="arithmatex">\(E = 25\)</span>、<span class="arithmatex">\(\Delta t = 20\)</span> ms）：</p>
+<table>
+<thead>
+<tr>
+<th>推理时间 <span class="arithmatex">\(L\)</span></th>
+<th>每轮</th>
+<th>停着的比例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>73 ms（RTX 4090 实测）</td>
+<td>573 ms</td>
+<td><span class="arithmatex">\(73 \div 573 = 12.7\%\)</span></td>
+</tr>
+<tr>
+<td>300 ms（<strong>编的</strong>，代表搬到小板子上变慢）</td>
+<td>800 ms</td>
+<td><span class="arithmatex">\(300 \div 800 = 37.5\%\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>停着不只是慢。机器人每隔一段时间顿一下，动作不连贯，还可能和训练数据里的节奏不一样（OpenVLA int8 就是这样掉了成功率，第 4 章第三步）。</p>
+<p><strong>一句话</strong>：同步执行时推理期间机器人停着；推理越慢，停得越多，动作越卡。</p>
+<h3 id="2026-11-26_1">第二步：异步执行：提前发起，边做边等（2026-11-26）</h3>
+<p><strong>类比：厨师请个帮手翻菜谱。</strong> 手上的菜还剩一半时，就让帮手去翻下一页；切完手上的，下一页刚好翻好，刀不用停。</p>
+<p>SmolVLA 论文把这个叫<strong>异步推理</strong>（§3.3 L300–L325）：执行动作和推理分开跑，动作队列还剩一定比例时就发起下一次推理。阈值写作 <span class="arithmatex">\(g\)</span>（L380–L392）：</p>
+<ul>
+<li><span class="arithmatex">\(g = 0\)</span>：队列用完才发起，就是同步执行，推理期间机器人空着；</li>
+<li><span class="arithmatex">\(g = 0.7\)</span>：队列消耗掉约 30% 就发起下一次推理（L387），推理期间照常执行剩下的 70%；</li>
+<li><span class="arithmatex">\(g = 1\)</span>：每一步都推理，最费算力。</li>
+</ul>
+<p><strong>不断档的条件</strong>：推理必须在剩下的动作用完前回来。</p>
+<div class="arithmatex">\[
+L \le g \times H \times \Delta t
+\]</div>
+<ul>
+<li><span class="arithmatex">\(H\)</span>：动作块的步数（π0 是 50）。</li>
+</ul>
+<p><strong>算一遍</strong>（<span class="arithmatex">\(H = 50\)</span>、<span class="arithmatex">\(\Delta t = 20\)</span> ms）：</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(g\)</span></th>
+<th>发起时队列剩</th>
+<th>推理必须在多少 ms 内回来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0 步</td>
+<td>0 ms（必然停顿）</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>25 步</td>
+<td>500 ms</td>
+</tr>
+<tr>
+<td>0.7</td>
+<td>35 步</td>
+<td>700 ms</td>
+</tr>
+</tbody>
+</table>
+<p><span class="arithmatex">\(g\)</span> 越大，留给推理的时间越多，但推理越频繁、越耗电（第 7 章）。</p>
+<p><strong>一句话</strong>：异步执行在队列还剩 <span class="arithmatex">\(g\)</span> 成时就发起推理，只要推理时间 ≤ <span class="arithmatex">\(g \times H \times \Delta t\)</span>，动作就不断档。</p>
+<h3 id="2026-11-26_2">第三步：新旧两块怎么接：不跳变（2026-11-26）</h3>
+<p>异步执行还有一个问题：新动作块回来时，旧块还没执行完。两块在重叠的那几步里给的动作可能不一样，直接切过去，机械臂会<strong>跳一下</strong>。</p>
+<p>常见做法：</p>
+<ol>
+<li><strong>重叠部分做平均</strong>：SmolVLA 在重叠的时间步上把新旧两个队列合并（L389–L392）；</li>
+<li><strong>实时分块 RTC</strong>：把已经承诺要执行的前几步当成固定的，新块只在后面"补画"，保证接上（π 团队的 Real-Time Chunking，讲义见 <a href="https://wikieden.github.io/vla-from-scratch/lessons/13-rtc.html">vla-deep-dive 第 13 章</a>）。GR00T 2 在 Thor 上也用了 RTC，160 ms 延迟下峰值 jerk（加加速度）降 69%（<a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a>）。</li>
+</ol>
+<p><strong>一句话</strong>：新旧动作块要平滑接上，常用重叠平均或 RTC 固定已承诺的前几步。</p>
+<h3 id="2026-11-26_3">第四步：快慢两套系统，和一条完整的时延预算（2026-11-26）</h3>
+<p><strong>快慢两套系统</strong>：GR00T N1 把模型拆开（L78–L89），看图想事的 VLM（System 2）在 L40 上 10 Hz，出动作的部分（System 1）120 Hz。每 100 ms 更新一次"想法"，中间 System 1 出 12 步动作。慢的部分可以放在更慢、更省电的地方跑，快的部分必须准时。</p>
+<p><strong>时延预算</strong>：模型只是一段。从相机拍照到电机动起来，每段都要算进去。</p>
+<p><img alt="从拍照到动作发出：一条时延预算" src="../figures/06-realtime-scheduling-budget.png" /></p>
+<table>
+<thead>
+<tr>
+<th>段</th>
+<th>耗时（<strong>都是编的</strong>，自己的机器要实测）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>等下一帧相机（30 fps，最坏要等一整帧 <span class="arithmatex">\(1000 \div 30\)</span>）</td>
+<td>33.3 ms</td>
+</tr>
+<tr>
+<td>预处理（缩放、归一化）</td>
+<td>5 ms</td>
+</tr>
+<tr>
+<td>模型推理（用 π0 在 4090 上的 73 ms）</td>
+<td>73 ms</td>
+</tr>
+<tr>
+<td>后处理（反归一化成关节角）</td>
+<td>2 ms</td>
+</tr>
+<tr>
+<td>发给控制器</td>
+<td>1 ms</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>114.3 ms</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>三个工程要点</strong>：</p>
+<ul>
+<li><strong>按 p99 设计，不按平均</strong>：100 次里最慢的那几次决定会不会断档。测延迟要跑几百次看分布。</li>
+<li><strong>减少拷贝</strong>：相机图像在 ROS 2 节点之间传，每拷一次都要时间；Isaac ROS 的 NITROS 让图像在 GPU 内存里直接传，不经过 CPU 拷贝。</li>
+<li><strong>隔离</strong>：推理进程、控制进程绑到不同的 CPU 核，避免日志、录包之类的任务抢资源造成抖动。</li>
+</ul>
+<p><strong>一句话</strong>：慢的想、快的动；时延要从拍照算到发出，按 p99 留余量。</p>
+<h3 id="_2">动画演示：同步停下等，异步不断档</h3>
+<p><img alt="同步与异步推理" src="../animations/06-realtime-scheduling.gif" /></p>
+<p>可交互版：<a href="../animations/06-realtime-scheduling.html">animations/06-realtime-scheduling.html</a>（滑块：一次推理要多少 ms，异步 g = 0.5）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>蓝线是动作队列还剩几步，红色区域是机器人停着等的时间；</li>
+<li>同步、推理 73 ms：每用完 25 步停一小段（第一步）；</li>
+<li>同步、推理 300 ms：红色变宽（第一步）；</li>
+<li>异步 g = 0.5、推理 300 ms：没有红色，队列一直没见底（第二步）；</li>
+<li>异步、推理 600 ms：超过 500 ms 的预算，又出现红色；</li>
+<li>拖滑块，找出红色刚好出现的推理时间。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第一步）：同步执行，每执行 16 步推理一次，控制 50 Hz，推理 180 ms。机器人停着的时间占百分之几？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第二步）：动作块 <span class="arithmatex">\(H = 40\)</span>，控制 50 Hz，推理要 450 ms。用异步执行，<span class="arithmatex">\(g\)</span> 至少要取多少才不会断档？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：时延预算里，把相机从 30 fps 换成 60 fps，最坏等帧时间变成多少？合计变成多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>同步做完停下等，推理越慢停越多；<br />
+异步剩 g 就发起，L 小于 g H 乘 Δt；<br />
+新旧两块要接平，重叠平均或 RTC；<br />
+慢的想来快的动，预算看 p99。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p><a href="../review.html">E11</a>（异步不断档的条件）、<a href="../review.html">E12</a>（同步执行停着的比例）</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ SmolVLA 论文 §3.3</td>
+<td><code>vla-deep-dive/materials/text/papers/smolvla-2506.01844.txt</code> L300–L392（Algorithm 1 L331）</td>
+<td>异步推理的完整算法和阈值 g</td>
+</tr>
+<tr>
+<td>★ VLA 讲义 · RTC</td>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/13-rtc.html">vla-deep-dive 第 13 章</a></td>
+<td>新旧动作块怎么平滑接上</td>
+</tr>
+<tr>
+<td>VLA 讲义 · 分层</td>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/10-hierarchy.html">vla-deep-dive 第 10 章</a></td>
+<td>快慢两套系统的设计</td>
+</tr>
+<tr>
+<td>GR00T 2 部署章</td>
+<td><a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a> 第二步</td>
+<td>RTC 在真实延迟下的平滑度收益</td>
+</tr>
+<tr>
+<td>ROS 2 讲义</td>
+<td><a href="https://wikieden.github.io/ros2-from-scratch/lessons/index.html">ros2 讲义目录</a></td>
+<td>节点、话题、QoS，以及部署到真机</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>占比</strong>：停着的时间 ÷ 一轮的总时间。</li>
+<li><strong>队列不见底</strong>：推理开始时队列剩 <span class="arithmatex">\(g H\)</span> 步，每步 <span class="arithmatex">\(\Delta t\)</span>，所以能撑 <span class="arithmatex">\(gH\Delta t\)</span>；推理时间超过它就会断档。</li>
+<li><strong>百分位</strong>：把 <span class="arithmatex">\(n\)</span> 次测量从小到大排，第 99% 位置上的数就是 p99。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>停着的比例 <span class="arithmatex">\(= L / (L + E\Delta t)\)</span></td>
+<td>同步执行</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(L \le g H \Delta t\)</span></td>
+<td>异步执行不断档的条件</td>
+</tr>
+<tr>
+<td>总时延 <span class="arithmatex">\(= \sum\)</span> 各段</td>
+<td>时延预算</td>
+</tr>
+<tr>
+<td>最坏等帧 <span class="arithmatex">\(= 1000 / \text{fps}\)</span> ms</td>
+<td>相机帧率带来的等待</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch06_realtime_scheduling.py</code>，配套测试 <code>tests/test_chapters.py::test_ch06</code>，notebook 在 <code>notebooks/ch06_realtime_scheduling.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch06_realtime_scheduling.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch06</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（73 ms、25 步、50 Hz、g = 0.7 来自论文；300 ms 和时延预算各项是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 同步停着的比例</td>
+<td><span class="arithmatex">\(73 / (73 + 25 \times 20)\)</span></td>
+<td><code>sync_idle_fraction(73, 25, 20)</code></td>
+<td>12.7%</td>
+</tr>
+<tr>
+<td>第一步 推理变慢</td>
+<td><span class="arithmatex">\(300 / 800\)</span></td>
+<td><code>sync_idle_fraction(300, 25, 20)</code></td>
+<td>37.5%</td>
+</tr>
+<tr>
+<td>第二步 异步预算</td>
+<td><span class="arithmatex">\(0.7 \times 50 \times 20\)</span></td>
+<td><code>async_budget_ms(50, 0.7, 20)</code></td>
+<td>700 ms</td>
+</tr>
+<tr>
+<td>第四步 时延预算</td>
+<td>各段相加</td>
+<td><code>budget_total(parts)</code></td>
+<td>114.3 ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def sync_idle_fraction(infer_ms, exec_steps, dt_ms):
+    return infer_ms / (infer_ms + exec_steps * dt_ms)   # 推理期间不动
+
+def async_budget_ms(chunk, g, dt_ms):
+    return g * chunk * dt_ms                            # 队列剩 g 成时发起，能撑这么久
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li><code>async_budget_ms</code> 假设推理时间每次一样。真实推理有抖动，要拿 p99 的推理时间和预算比，不能拿平均值。</li>
+<li>动画里的队列模拟把新块直接接在旧队列后面（每次补 25 步），是简化；SmolVLA 的实现会在重叠部分合并新旧动作。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>g</code> 改成 0.3，看预算变成多少，π0 在 4090 上的 73 ms 还够不够。</li>
+<li>在 <code>parts</code> 里加一项"日志进程抢 CPU 10 ms"，看合计变成多少。</li>
+</ul><nav class="pager"><a href="05-inference-engines.html">← 第 5 章 · 推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="07-power-and-cloud.html">第 7 章 · 功耗、散热和端云分工 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

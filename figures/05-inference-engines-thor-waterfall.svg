@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="360" viewBox="0 0 820 360">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">GR00T 2 在 Jetson Thor 上一层层削延迟</text>
+<text x="16.0" y="350.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">G1 Turbo，Thor 120 W，500 次中位数（GR00T 2 白皮书 Fig. 19）。TensorRT 一步省掉近一半。</text>
+<line x1="190.0" y1="56.0" x2="190.0" y2="320.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="190.0" y="336.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">0 ms</text>
+<line x1="330.0" y1="56.0" x2="330.0" y2="320.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="330.0" y="336.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">200 ms</text>
+<line x1="470.0" y1="56.0" x2="470.0" y2="320.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="470.0" y="336.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">400 ms</text>
+<line x1="610.0" y1="56.0" x2="610.0" y2="320.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="610.0" y="336.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">600 ms</text>
+<line x1="750.0" y1="56.0" x2="750.0" y2="320.0" stroke="#eef0f3" stroke-width="1"/>
+<text x="750.0" y="336.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#6b7280" text-anchor="middle" font-weight="normal">800 ms</text>
+<text x="180.0" y="82.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">基线 eager BF16</text>
+<rect x="190.0" y="68.0" width="504.3" height="24.0" rx="4" fill="#6b7280" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="702.3" y="85.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">720.41</text>
+<text x="180.0" y="126.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">+ 运行时优化</text>
+<rect x="190.0" y="112.0" width="430.2" height="24.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="628.2" y="129.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">614.53</text>
+<text x="180.0" y="170.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">+ TensorRT</text>
+<rect x="190.0" y="156.0" width="179.3" height="24.0" rx="4" fill="#ea580c" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="377.3" y="173.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">256.12</text>
+<text x="180.0" y="214.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">+ CUDA graph</text>
+<rect x="190.0" y="200.0" width="177.8" height="24.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="375.8" y="217.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">254.00</text>
+<text x="180.0" y="258.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">+ FP8 混合精度</text>
+<rect x="190.0" y="244.0" width="127.6" height="24.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="325.6" y="261.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">182.22</text>
+<text x="180.0" y="302.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">+ 去噪步数减半</text>
+<rect x="190.0" y="288.0" width="86.8" height="24.0" rx="4" fill="#2563eb" stroke="none" stroke-width="1.4" opacity="0.75"/>
+<text x="284.8" y="305.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#1f2937" text-anchor="start" font-weight="normal">123.97</text>
+</svg>

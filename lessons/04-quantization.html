@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 4 章 · 量化：省内存、省带宽，但不一定变快 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html" class="cur"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="4">第 4 章 · 量化：省内存、省带宽，但不一定变快</h1><div class="run"><a class="btn" href="../animations/04-quantization.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch04_quantization.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch04_quantization.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch04_quantization.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：把模型从 16 位压到 8 位、4 位，到底省了什么？为什么 OpenVLA 用 int8 反而更差？量化完怎么知道没把机器人"改坏"？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/03-lower-bounds.html">第 3 章 先算下限</a> · 下一章：<a href="../lessons/05-inference-engines.html">第 5 章 推理引擎</a><br />
+对应原文：<code>vla-deep-dive/materials/text/papers/openvla-2406.09246.txt</code> §5.4 L602–L644（Table 2 L607–L609；int8 变慢 L639–L644）；《深入理解 AI Infra》§8.4 <code>ai-infra/materials/ai-infra-book/manuscripts/08-推理优化.md</code> L398–L414（q8_0 / q4_0 的字节布局）；GR00T 2 的验收流程见 <a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a><br />
+本章缩写：FP8 = 8-bit floating point（8 位浮点）· INT8 / INT4 = 8 / 4 位整数 · scale = 缩放系数 · W4A16 = Weight 4-bit, Activation 16-bit（权重 4 位、激活 16 位）· W8A8 = 权重和激活都 8 位 · q4_0 / q8_0 = llama.cpp 的分组量化格式（每 32 个数一组）· GGUF = llama.cpp 用的模型文件格式 · MSE = Mean Squared Error（均方 / 误差）· A5000 = NVIDIA 工作站显卡型号。全部缩写见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：位数少一半，字节少一半（2026-11-26）</h3>
+<p><strong>类比：用粗一点的尺子量东西。</strong> bf16 像一把刻度很细的尺子，每个数要记 16 位；int4 像一把只有 15 个刻度的粗尺子，每个数只记 4 位。东西还是那个东西，记下来的数据少了很多，但量得没那么准。</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>每个数占</th>
+<th>7B 模型的权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bf16</td>
+<td>2 字节</td>
+<td>14.00 GB</td>
+</tr>
+<tr>
+<td>FP8 / INT8</td>
+<td>1 字节</td>
+<td>7.00 GB</td>
+</tr>
+<tr>
+<td>q4_0</td>
+<td>0.5625 字节（平均 4.5 位）</td>
+<td>3.94 GB</td>
+</tr>
+<tr>
+<td>INT4</td>
+<td>0.5 字节</td>
+<td>3.50 GB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>为什么 q4_0 是 4.5 位而不是 4 位</strong>（AII §8.4 L408–L414）：每 32 个数一组，每个数 4 位共 16 字节，组里还要存一个 2 字节的缩放系数 scale（下一步讲），一组 18 字节，平均 <span class="arithmatex">\(18 \times 8 \div 32 = 4.5\)</span> 位。</p>
+<p><img alt="同样 32 个数，三种存法各占多少字节" src="../figures/04-quantization-q4-layout.png" /></p>
+<p><strong>省下的不只是容量</strong>。第 3 章说过，逐个生成 token 时每步都要读一遍权重；权重小一半，读的时间也少一半。所以 batch = 1 的机器人上，量化同时省<strong>内存</strong>和<strong>带宽</strong>。</p>
+<p><strong>一句话</strong>：位数减半，权重的字节减半，每步要读的数据也减半。</p>
+<h3 id="5-2026-11-26">第二步：亲手量化 5 个数（2026-11-26）</h3>
+<p><strong>对称量化</strong>两步：</p>
+<ol>
+<li>算缩放系数：<span class="arithmatex">\(\text{scale} = \dfrac{\max |x|}{q_{\max}}\)</span>。<span class="arithmatex">\(q_{\max}\)</span> 是能用的最大整数，int8 是 <span class="arithmatex">\(2^7 - 1 = 127\)</span>，int4 是 <span class="arithmatex">\(2^3 - 1 = 7\)</span>。</li>
+<li>每个数除以 scale 再四舍五入成整数：<span class="arithmatex">\(q = \text{round}(x / \text{scale})\)</span>；用的时候乘回去：<span class="arithmatex">\(\hat x = q \times \text{scale}\)</span>（<span class="arithmatex">\(\hat x\)</span> 读作"x hat"，表示还原出来的近似值）。</li>
+</ol>
+<p><strong>例子</strong>（5 个权重是编的：0.12、−0.5、0.33、0.9、−0.07，最大绝对值 0.9）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>scale</th>
+<th>整数</th>
+<th>还原</th>
+<th>最大误差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int8</td>
+<td><span class="arithmatex">\(0.9 \div 127 = 0.00709\)</span></td>
+<td>17、−71、47、127、−10</td>
+<td>0.12、−0.503、0.333、0.9、−0.071</td>
+<td>0.0031</td>
+</tr>
+<tr>
+<td>int4</td>
+<td><span class="arithmatex">\(0.9 \div 7 = 0.12857\)</span></td>
+<td>1、−4、3、7、−1</td>
+<td>0.129、−0.514、0.386、0.9、−0.129</td>
+<td>0.0586</td>
+</tr>
+</tbody>
+</table>
+<p>int4 的格子很粗：0.33 被对到 3 × 0.12857 = 0.386。这就是为什么实际格式都<strong>分组</strong>（每 32 个或 128 个数各算一个 scale）：组越小，组里的最大值越接近其他数，格子越贴合。</p>
+<p><strong>一句话</strong>：scale = 最大绝对值 ÷ 最大整数，除完四舍五入；位数越少格子越粗，所以要分小组各算 scale。</p>
+<h3 id="2026-11-26_1">第三步：只压权重，还是连激活一起压（2026-11-26）</h3>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>压什么</th>
+<th>省了什么</th>
+<th>适合哪一段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>只压权重</strong>（W4A16、W8A16）</td>
+<td>权重存成 4 / 8 位，算的时候临时还原成 16 位</td>
+<td>内存、<strong>带宽</strong></td>
+<td>逐个生成、flow 动作步（带宽卡，第 3 章第三步）</td>
+</tr>
+<tr>
+<td><strong>权重和激活都压</strong>（W8A8、FP8）</td>
+<td>两边都是 8 位，用低精度的矩阵单元直接算</td>
+<td>内存、带宽、<strong>算力</strong></td>
+<td>前缀 prefill（算力卡）</td>
+</tr>
+</tbody>
+</table>
+<p>只压权重时，计算还是 16 位做的，算力没省。对被算力卡住的前缀，它帮不上大忙；要靠 FP8 / INT8 这种两边都压、硬件直接用低精度算的方式。Thor 支持 FP4 / FP8，就是为了这一段。</p>
+<p><strong>OpenVLA 的反例</strong>（Table 2 L607–L609，§5.4 L639–L644）：</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>成功率</th>
+<th>显存</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bf16</td>
+<td>71.3%</td>
+<td>16.8 GB</td>
+</tr>
+<tr>
+<td>int8</td>
+<td><strong>58.1%</strong></td>
+<td>10.2 GB</td>
+</tr>
+<tr>
+<td>int4</td>
+<td>71.9%</td>
+<td>7.0 GB</td>
+</tr>
+</tbody>
+</table>
+<p>int8 更省内存，成功率却掉了 13 个点。论文的解释：它用的 int8 实现多了量化、反量化的额外算子，<strong>推理反而变慢</strong>，在 A5000 上只有 1.2 Hz，机器人的动作节奏和训练数据里的不一样了（L639–L644）。int4 读的数据更少，抵消了额外开销，所以又快又准。</p>
+<p><strong>教训</strong>：量化的效果要看<strong>实际速度</strong>和<strong>闭环任务成功率</strong>，不能只看内存省了多少。</p>
+<p><strong>一句话</strong>：只压权重省带宽，连激活一起压才省算力；量化有额外开销，变慢了照样会把任务做坏。</p>
+<h3 id="2026-11-26_2">第四步：量化完怎么验收（2026-11-26）</h3>
+<p>GR00T 2 部署时用 FP8 混合精度，它的验收分三层（<a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a>第一步）：</p>
+<ol>
+<li><strong>数值比对</strong>：同一个观测、同一个初始噪声，量化版和原版各出一次动作，比两者的均方误差（MSE）；</li>
+<li><strong>仿真</strong>：在仿真环境里跑完整任务，看成功率；</li>
+<li><strong>真机</strong>：成功率、完成时间、动作平滑度一起看。</li>
+</ol>
+<p>"数值误差小"不等于"任务能成功"：误差可能集中在某几个关键时刻（比如夹爪快合上时），平均下来很小，却决定了成败。</p>
+<p><strong>哪些部分最敏感</strong>（经验做法，不是某篇论文的结论）：
+- <strong>视觉编码器</strong>和<strong>最后出动作的层</strong>通常保留更高精度；
+- <strong>校准数据</strong>要用机器人自己场景里的图像，不要用网上的通用图片——量化时要靠这些数据决定 scale。</p>
+<p><strong>一句话</strong>：量化后先比数值、再跑仿真、最后上真机，三关都过才算数。</p>
+<h3 id="_2">动画演示：把每个权重对齐到最近的格子上</h3>
+<p><img alt="量化：把数对齐到格子上" src="../animations/04-quantization.gif" /></p>
+<p>可交互版：<a href="../animations/04-quantization.html">animations/04-quantization.html</a>（滑块：用几位整数）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>蓝点是 5 个原始权重（第二步）；</li>
+<li>int8 的橙色格子很细，对齐后几乎不动，最大误差 0.003（第二步）；</li>
+<li>int4 只有 15 个格子，0.33 被拉到 0.386（第二步）；</li>
+<li>底下一行是每个权重占几字节、7B 模型有多大（第一步）；</li>
+<li>拖滑块从 2 位到 8 位，看误差和大小一起变。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步）：把 [0.2, −0.8, 0.4] 用 int4 对称量化（一组，<span class="arithmatex">\(q_{\max} = 7\)</span>）。scale 是多少？三个整数是多少？还原后最大误差是多少？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一步）：一个 3.3B 的模型，从 bf16 换成 q4_0，权重从多少 GB 变成多少 GB？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第三步）：π0 的前缀被算力卡住、动作步被带宽卡住。如果只做 W4A16（只压权重），哪一段会明显变快？为什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>位数减半字节减半，带宽内存一起省；<br />
+最大绝对除最大整，四舍五入对格子；<br />
+只压权重省带宽，连激活压才省算；<br />
+变慢一样会做坏，数值仿真加真机。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p><a href="../review.html">E07</a>（对称量化的 scale 怎么算）、<a href="../review.html">E08</a>（OpenVLA int8 为什么更差）</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ OpenVLA 论文 §5.4</td>
+<td><code>vla-deep-dive/materials/text/papers/openvla-2406.09246.txt</code> L602–L644，附录 L1990–L2049</td>
+<td>量化在真实机器人任务上的效果，以及 int8 变慢的分析</td>
+</tr>
+<tr>
+<td>★ 《深入理解 AI Infra》§8.4</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/08-推理优化.md</code> L382–L500</td>
+<td>权重量化、KV 压缩、卸载在容量和速度之间怎么选</td>
+</tr>
+<tr>
+<td>GR00T 2 部署章</td>
+<td><a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a></td>
+<td>FP8 混合精度的收益和验收方法</td>
+</tr>
+<tr>
+<td>高效 VLA 综述</td>
+<td><code>vla-deep-dive/materials/text/papers/survey-efficient-vla-2510.24795.txt</code> L588–L597</td>
+<td>面向端侧的小模型和压缩方法索引</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>对称量化</strong>：<span class="arithmatex">\(\text{scale} = \max|x| / q_{\max}\)</span>，<span class="arithmatex">\(q = \text{round}(x / \text{scale})\)</span>，<span class="arithmatex">\(\hat x = q \cdot \text{scale}\)</span>。最大舍入误差是 scale 的一半。</li>
+<li><strong>分组</strong>：每组单独算 scale，组越小越准，但每组都要多存一个 scale（q4_0 每 32 个数多 2 字节）。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>权重 GB <span class="arithmatex">\(=\)</span> 参数（B）<span class="arithmatex">\(\times\)</span> 每个数的字节</td>
+<td>不同格式下的模型大小</td>
+</tr>
+<tr>
+<td>$\text{scale} = \max</td>
+<td>x</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(q = \text{round}(x / \text{scale})\)</span></td>
+<td>量化</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat x = q \times \text{scale}\)</span></td>
+<td>反量化</td>
+</tr>
+<tr>
+<td>q4_0：每 32 个数 <span class="arithmatex">\(16 + 2 = 18\)</span> 字节</td>
+<td>平均 4.5 位</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch04_quantization.py</code>，配套测试 <code>tests/test_chapters.py::test_ch04</code>，notebook 在 <code>notebooks/ch04_quantization.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch04_quantization.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch04</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（OpenVLA 的数来自论文 Table 2；5 个权重是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 7B 各格式大小</td>
+<td>参数 × 字节</td>
+<td><code>weights_gb(7, "int4")</code></td>
+<td>3.50 GB（bf16 14 GB）</td>
+</tr>
+<tr>
+<td>第一步 q4_0 一组</td>
+<td><span class="arithmatex">\(16 + 2\)</span></td>
+<td><code>q4_0_block_bytes()</code></td>
+<td>18 字节</td>
+</tr>
+<tr>
+<td>第二步 int8 量化</td>
+<td>$\max</td>
+<td>x</td>
+<td>/ 127$</td>
+</tr>
+<tr>
+<td>第二步 int4 量化</td>
+<td>$\max</td>
+<td>x</td>
+<td>/ 7$</td>
+</tr>
+<tr>
+<td>第二步 int4 还原误差</td>
+<td>$\max</td>
+<td>x - \hat x</td>
+<td>$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def quantize(xs, bits):
+    qmax = 2 ** (bits - 1) - 1                    # int8 → 127，int4 → 7
+    scale = max(abs(x) for x in xs) / qmax        # 最大绝对值对到最大整数
+    return scale, [round(x / scale) for x in xs]  # 每个数除以 scale 再四舍五入
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li>Python 的 <code>round</code> 是"四舍六入五成双"（0.5 舍到偶数），和有些硬件的舍入规则不同；本章例子里没碰到正好 .5 的情况。</li>
+<li>真实框架里 scale 也有精度（q4_0 用 2 字节的 fp16 存），这里用的是 Python 的双精度浮点，误差会略小一点。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>xs</code> 里的 0.9 改成 3.0（加一个离群值），看 int4 的误差变成多少——这就是要分组的原因。</li>
+<li>把 <code>quantize</code> 改成两组各算一个 scale（前 3 个一组、后 2 个一组），看误差下降多少。</li>
+</ul><nav class="pager"><a href="03-lower-bounds.html">← 第 3 章 · 先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="05-inference-engines.html">第 5 章 · 推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

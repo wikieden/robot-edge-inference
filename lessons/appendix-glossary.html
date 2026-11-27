@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>附录 · 缩写与术语表 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html" class="cur">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="_1">附录 · 缩写与术语表</h1>
+<blockquote>
+<p>用途：讲义里遇到缩写，先查这一页。每章开头的"本章缩写"只列这一章用到的。整理日期：2026-11-26。<br />
+写法：缩写 = 英文全称（逐词拆开的中文意思）；"第一次出现"指本书 8 章讲义里第一次出现的那一章。全称和仓库里其他讲义书保持一致。</p>
+</blockquote>
+<h2 id="_2">模型与机器人</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VLA</td>
+<td>Vision-Language-Action</td>
+<td>视觉 / 语言 / 动作：看图、听指令、直接出动作的机器人模型</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>VLM</td>
+<td>Vision-Language Model</td>
+<td>视觉 / 语言 / 模型：看图说话的大模型，VLA 里负责"想"</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>System 1 / System 2</td>
+<td>—</td>
+<td>GR00T N1 的叫法：System 2 慢，看图想事；System 1 快，出动作</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>flow</td>
+<td>flow matching</td>
+<td>流匹配：π0 从噪声一步步生成动作的方法</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>RTC</td>
+<td>Real-Time Chunking</td>
+<td>实时 / 分块：新动作块只补画后面，已承诺的前几步固定，衔接不抖</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>ROS 2</td>
+<td>Robot Operating System 2</td>
+<td>机器人 / 操作 / 系统 第 2 版：机器人软件的通信框架</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>NITROS</td>
+<td>NVIDIA Isaac Transport for ROS</td>
+<td>Isaac ROS 的零拷贝传输：图像在 GPU 内存里直接传</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>OTA</td>
+<td>Over-The-Air</td>
+<td>空中升级：远程推送软件 / 模型</td>
+<td><a href="../lessons/08-case-study.html">第 8 章</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">芯片与硬件</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPU</td>
+<td>Graphics Processing Unit</td>
+<td>图形 / 处理 / 单元：并行做大量相似运算，现在主要用来算模型</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>Central Processing Unit</td>
+<td>中央 / 处理 / 单元：跑系统、ROS 2，负责提交 GPU 任务</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>SoC</td>
+<td>System on Chip</td>
+<td>片上 / 系统：CPU、GPU 等做在一颗芯片上</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>LPDDR</td>
+<td>Low-Power Double Data Rate</td>
+<td>低功耗 / 双倍 / 数据速率内存：手机和 Jetson 用的内存，5 / 5X 是代数</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>DLA</td>
+<td>Deep Learning Accelerator</td>
+<td>深度学习 / 加速器：Orin 上专跑卷积网络的小核，和 GPU 分开</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>ISP</td>
+<td>Image Signal Processor</td>
+<td>图像 / 信号 / 处理器：把相机原始数据处理成图像</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>NPU</td>
+<td>Neural Processing Unit</td>
+<td>神经网络 / 处理 / 单元：其他厂商板子上的 AI 加速核</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>PCIe</td>
+<td>Peripheral Component Interconnect Express</td>
+<td>外设 / 部件 / 互联 / 高速版：台式机里 CPU 和显卡之间的连接</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>AGX</td>
+<td>—</td>
+<td>NVIDIA Jetson 高端型号的产品名（官方没给全称）</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>MAXN</td>
+<td>—</td>
+<td>Jetson 功率模式里"不限功率"那一档的名字（官方没给全称）</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>JetPack</td>
+<td>—</td>
+<td>NVIDIA 给 Jetson 的整套系统软件（系统、驱动、CUDA、TensorRT）</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>L40 / A5000 / RTX 4090</td>
+<td>—</td>
+<td>NVIDIA 的数据中心卡 / 工作站卡 / 消费级卡型号</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">单位与性能指标</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hz</td>
+<td>Hertz</td>
+<td>赫兹：每秒多少次</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>ms / µs</td>
+<td>millisecond / microsecond</td>
+<td>毫秒 / 微秒：千分之一秒 / 百万分之一秒</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>TOPS</td>
+<td>Tera Operations Per Second</td>
+<td>每秒万亿次运算（整数运算常用）</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>TFLOPS</td>
+<td>Tera Floating-point Operations Per Second</td>
+<td>每秒万亿次浮点运算</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>GB/s</td>
+<td>gigabytes per second</td>
+<td>每秒吉字节：内存带宽的单位</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>fps</td>
+<td>frames per second</td>
+<td>每秒帧数：相机帧率</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>p50 / p99</td>
+<td>50th / 99th percentile</td>
+<td>第 50 / 99 百分位：中位数 / 100 次里最慢的那 1 次左右</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>W / J / Wh</td>
+<td>watt / joule / watt-hour</td>
+<td>瓦（功率）/ 焦耳（能量）/ 瓦时（电池能量，1 Wh = 3600 J）</td>
+<td><a href="../lessons/07-power-and-cloud.html">第 7 章</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">数值格式与量化</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BF16 / bf16</td>
+<td>Brain Float 16</td>
+<td>Google Brain 提出的 16 位浮点，每个数 2 字节</td>
+<td><a href="../lessons/03-lower-bounds.html">第 3 章</a></td>
+</tr>
+<tr>
+<td>FP16 / FP8 / FP4</td>
+<td>16 / 8 / 4-bit Floating Point</td>
+<td>16 / 8 / 4 位浮点</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>INT8 / INT4</td>
+<td>8 / 4-bit integer</td>
+<td>8 / 4 位整数</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>W4A16 / W8A8</td>
+<td>Weight 4-bit Activation 16-bit / Weight 8-bit Activation 8-bit</td>
+<td>权重 4 位、激活 16 位 / 两边都 8 位</td>
+<td><a href="../lessons/04-quantization.html">第 4 章</a></td>
+</tr>
+<tr>
+<td>q4_0 / q8_0</td>
+<td>—</td>
+<td>llama.cpp 的分组量化格式：每 32 个数一组，加一个 2 字节 scale</td>
+<td><a href="../lessons/04-quantization.html">第 4 章</a></td>
+</tr>
+<tr>
+<td>GGUF</td>
+<td>—</td>
+<td>llama.cpp 用的模型文件格式</td>
+<td><a href="../lessons/04-quantization.html">第 4 章</a></td>
+</tr>
+<tr>
+<td>MSE</td>
+<td>Mean Squared Error</td>
+<td>均方误差：差值平方再平均</td>
+<td><a href="../lessons/04-quantization.html">第 4 章</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">推理软件</h2>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>全称</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CUDA</td>
+<td>Compute Unified Device Architecture</td>
+<td>计算 / 统一 / 设备 / 架构：NVIDIA GPU 的编程平台</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>TensorRT</td>
+<td>Tensor RunTime</td>
+<td>张量 / 运行时：NVIDIA 推理优化引擎，把模型编译成 engine</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>ONNX</td>
+<td>Open Neural Network Exchange</td>
+<td>开放 / 神经网络 / 交换格式：从 PyTorch 导出给 TensorRT 用</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>MLC</td>
+<td>Machine Learning Compilation</td>
+<td>机器学习 / 编译：一个开源的 LLM 推理框架，NVIDIA 用它在 Orin 上测 INT4 模型</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>TensorRT-LLM / TensorRT Edge-LLM</td>
+<td>—</td>
+<td>NVIDIA 面向大语言模型的推理库，后者面向端侧</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="_7">术语</h2>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>意思</th>
+<th>第一次出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>动作块（action chunk）</td>
+<td>模型一次输出的一串未来动作，π0 一块 50 步</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>batch</td>
+<td>一批一起算的请求；机器人上通常是 1</td>
+<td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
+</tr>
+<tr>
+<td>统一内存</td>
+<td>CPU、GPU、DLA、相机共用的一块内存</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>稀疏 / 稠密口径</td>
+<td>官方算力按 2:4 稀疏报，稠密是它的一半</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>Super Mode</td>
+<td>Orin Nano / NX 通过 JetPack 6.2 提频提功率，同一块硬件</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>功率模式</td>
+<td>用 <code>nvpmodel</code> 切换的几档功率上限</td>
+<td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
+</tr>
+<tr>
+<td>prefill / decode</td>
+<td>预填充（输入一次算完）/ 解码（一个一个往外吐 token）</td>
+<td><a href="../lessons/03-lower-bounds.html">第 3 章</a></td>
+</tr>
+<tr>
+<td>scale</td>
+<td>量化的缩放系数：最大绝对值 ÷ 最大整数</td>
+<td><a href="../lessons/04-quantization.html">第 4 章</a></td>
+</tr>
+<tr>
+<td>kernel / launch</td>
+<td>GPU 上的一个小程序 / CPU 提交一次 kernel</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>eager</td>
+<td>PyTorch 默认的即时执行，一行代码算一次</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>融合（fusion）</td>
+<td>把相邻算子合成一个 kernel，中间结果不写回内存</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>CUDA Graph</td>
+<td>把一整步的 kernel 录下来，以后一次提交</td>
+<td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
+</tr>
+<tr>
+<td>同步 / 异步执行</td>
+<td>推理期间机器人停着等 / 边执行边推理</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>阈值 g</td>
+<td>动作队列还剩几成时发起下一次推理（SmolVLA）</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>时延预算</td>
+<td>从拍照到动作发出各段时间加起来</td>
+<td><a href="../lessons/06-realtime-scheduling.html">第 6 章</a></td>
+</tr>
+<tr>
+<td>拖尾</td>
+<td>少数特别慢的请求，决定 p99</td>
+<td><a href="../lessons/07-power-and-cloud.html">第 7 章</a></td>
+</tr>
+<tr>
+<td>余量</td>
+<td>预算 ÷ 下限：实际能比下限慢几倍还来得及</td>
+<td><a href="../lessons/08-case-study.html">第 8 章</a></td>
+</tr>
+<tr>
+<td>watchdog</td>
+<td>看门狗：超时没收到心跳就触发保护</td>
+<td><a href="../lessons/08-case-study.html">第 8 章</a></td>
+</tr>
+</tbody>
+</table>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

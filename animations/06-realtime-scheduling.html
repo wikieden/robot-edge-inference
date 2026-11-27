@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>同步与异步推理</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 06 章 · 同步执行会停下等推理，异步执行提前发起、动作不断档</h1>
+<p class="sub">配套讲义：<a href="../lessons/06-realtime-scheduling.html">第 6 章 · 实时调度：动作块、异步推理、快慢两套系统</a>。动作块 50 步、每步 20 ms（π0 的设置）；g 是队列还剩几成时发起下一次推理（SmolVLA 的写法）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="L">自己拖：一次推理要多少 ms（异步，g = 0.5）</label><input type="range" id="L" min="50" max="900" step="10" value="300"><span id="Lv">300</span></div>
+<p class="note">看点：① 曲线是动作队列还剩几步；② 同步：用完 25 步才发起推理，推理期间队列停在 25 不动、机器人在等（红色）；③ 异步 g = 0.5：剩 25 步时发起，推理期间照常执行，回来后接上新块；④ 只要推理时间 ≤ g × 50 × 20 ms，队列就不会见底。滑块：推理超过 500 ms，异步也会断档。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const X0=60,W=580,TT=2500,xs=t=>X0+t/TT*W,ys=q=>300-q/50*200;
+function simulate(L,mode){const pts=[],stall=[];let t=0,q=50,pending=null;const dt=20;
+ while(t<TT){if(pending!==null&&t>=pending){q=Math.min(50,q+25);pending=null}
+  if(mode==='sync'){if(q<=25&&pending===null){pending=t+L;stall.push([t,t+L]);pts.push([t,q]);t=pending;pts.push([t,q]);continue}}
+  else if(q<=25&&pending===null)pending=t+L;
+  if(q>0){pts.push([t,q]);q-=1}else{stall.push([t,t+dt]);pts.push([t,0])}
+  t+=dt}return{pts,stall}}
+const ST=[{cap:'同步：推理 73 ms，队列停在 25 步等它回来',m:'sync',L:73},{cap:'同步：推理变慢到 300 ms，红色是机器人停着的时间',m:'sync',L:300},
+ {cap:'异步 g = 0.5：剩 25 步就发起，推理时照常执行',m:'async',L:300},{cap:'异步：推理 600 ms 超过 500 ms 预算，队列见底（红色）',m:'async',L:600}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function plot(L,m){const {pts,stall}=simulate(L,m);
+ el('line',{x1:X0,y1:300,x2:X0+W,y2:300,stroke:'var(--muted)'},sv);el('line',{x1:X0,y1:100,x2:X0,y2:300,stroke:'var(--muted)'},sv);
+ [0,25,50].forEach(v=>txt(v+' 步',{x:X0-6,y:ys(v)+4,'text-anchor':'end',class:'m'},sv));for(let t=0;t<=TT;t+=500)txt(t+' ms',{x:xs(t),y:320,'text-anchor':'middle',class:'m'},sv);
+ stall.forEach(([a,b])=>el('rect',{x:xs(a),y:100,width:Math.max(1,xs(Math.min(b,TT))-xs(a)),height:200,fill:'var(--bad)',opacity:.15},sv));
+ el('polyline',{points:pts.filter(p=>p[0]<=TT).map(([t,q])=>xs(t)+','+ys(q)).join(' '),fill:'none',stroke:'var(--accent)','stroke-width':2},sv);
+ const s=stall.reduce((a,[x,y])=>a+Math.min(y,TT)-x,0);txt(`停着等 ${Math.round(s)} ms / ${TT} ms`,{x:X0+W,y:90,'text-anchor':'end',class:'big'},sv)}
+function draw(){clear(sv);
+ if(custom!==null){txt(`异步 g = 0.5，推理 ${custom} ms（预算 500 ms）`,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);plot(custom,'async');return}
+ const f=ST[FR[k]];txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);plot(f.L,f.m)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('L').oninput=e=>{ANIM.stop();custom=+e.target.value;$('Lv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1700);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

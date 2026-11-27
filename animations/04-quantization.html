@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>量化：把数对齐到格子上</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 04 章 · 量化：把每个权重对齐到最近的格子上，位数越少格子越粗</h1>
+<p class="sub">配套讲义：<a href="../lessons/04-quantization.html">第 4 章 · 量化：省内存、省带宽，但不一定变快</a>。5 个权重 0.12、−0.5、0.33、0.9、−0.07 是编的；scale = 最大绝对值 ÷ 最大整数（int8 是 127，int4 是 7）。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="b">自己拖：用几位整数</label><input type="range" id="b" min="2" max="8" step="1" value="4"><span id="bv">4</span></div>
+<p class="note">看点：① 5 个原始权重（蓝点）；② int8 的格子很细（每格 0.9 ÷ 127 ≈ 0.007），对齐后几乎不动；③ int4 只有 15 个格子（每格 0.9 ÷ 7 ≈ 0.129），0.33 被拉到 0.386，误差 0.056 左右；④ 位数少一半，权重就小一半，每步要读的字节也少一半。滑块：改位数，看格子和最大误差。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const XS=[0.12,-0.5,0.33,0.9,-0.07];const X0=60,W=560,xs=v=>X0+(v+1)/2*W;
+const ST=[{cap:'5 个原始权重（编的）',b:0},{cap:'int8：scale = 0.9 ÷ 127，格子很细',b:8},{cap:'int8 对齐后几乎不动，最大误差 0.003',b:8,snap:1},
+ {cap:'int4：scale = 0.9 ÷ 7，只有 15 个格子',b:4},{cap:'int4 对齐后：最大误差约 0.059',b:4,snap:1}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function q(b){const qm=2**(b-1)-1,s=0.9/qm;return{s,qm,qs:XS.map(x=>Math.round(x/s))}}
+function draw(){clear(sv);let b,snap,cap;
+ if(custom!==null){b=custom;snap=1;cap=`int${b}：scale = 0.9 ÷ ${2**(b-1)-1}`}else{const f=ST[FR[k]];b=f.b;snap=f.snap;cap=f.cap}
+ txt(cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);
+ el('line',{x1:X0,y1:150,x2:X0+W,y2:150,stroke:'var(--muted)'},sv);[-1,-0.5,0,0.5,1].forEach(v=>txt(v+'',{x:xs(v),y:172,'text-anchor':'middle',class:'m'},sv));
+ if(b){const {s,qm,qs}=q(b);for(let i=-qm;i<=qm;i++)el('line',{x1:xs(i*s),y1:138,x2:xs(i*s),y2:162,stroke:'var(--warm)','stroke-width':b>=7?0.4:1.2,opacity:.7},sv);
+  if(snap){let err=0;XS.forEach((x,j)=>{const y=qs[j]*s;err=Math.max(err,Math.abs(x-y));el('line',{x1:xs(x),y1:118,x2:xs(y),y2:150,stroke:'var(--muted)','stroke-dasharray':'3 2'},sv);
+    el('circle',{cx:xs(y),cy:150,r:6,fill:'var(--warm)'},sv)});
+   txt(`最大误差 ${err.toFixed(4)}`,{x:340,y:220,'text-anchor':'middle',class:'big'},sv);
+   txt(`整数：[${qs.join(', ')}]`,{x:340,y:248,'text-anchor':'middle',class:'m'},sv)}
+  const bytes=b/8;txt(`每个权重 ${b} 位 = ${bytes} 字节；7B 模型约 ${(7*bytes).toFixed(2)} GB（bf16 是 14 GB）`,{x:340,y:300,'text-anchor':'middle',class:'big'},sv)}
+ XS.forEach(x=>{el('circle',{cx:xs(x),cy:110,r:6,fill:'var(--accent)'},sv);txt(x+'',{x:xs(x),y:96,'text-anchor':'middle',class:'m'},sv)})}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('b').oninput=e=>{ANIM.stop();custom=+e.target.value;$('bv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1500);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

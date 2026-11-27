@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 1 章 · 机器人上的推理：和云上有什么不同 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html" class="cur"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="1">第 1 章 · 机器人上的推理：和云上有什么不同</h1><div class="run"><a class="btn" href="../animations/01-robot-constraints.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch01_robot_constraints.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch01_robot_constraints.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch01_robot_constraints.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：同一个模型，放在机器人身上跑和放在数据中心跑，要操心的事情有什么不一样？"推理要多快"这个要求是从哪里来的？<br />
+编写日期：2026-11-26 · 下一章：<a href="../lessons/02-edge-chips.html">第 2 章 端侧芯片</a><br />
+对应原文：<code>vla-deep-dive/materials/text/papers/pi0-2410.24164.txt</code> §IV L255（H = 50）、L938–L940（50 Hz 机器人每 0.5 s 推理一次）、Table I L942–L951（RTX 4090 耗时分解）；<code>gr00t-n1-2503.14734.txt</code> L78–L89（System 2 10 Hz、System 1 120 Hz）<br />
+本章缩写：VLA = Vision-Language-Action（视觉 / 语言 / 动作，看图听指令出动作的模型）· VLM = Vision-Language Model（视觉 / 语言 / 模型）· Hz = Hertz（赫兹，每秒多少次）· ms = millisecond（毫秒）· GPU = Graphics Processing Unit（图形 / 处理 / 单元）· RTX 4090 = NVIDIA 的消费级显卡型号 · L40 = NVIDIA 的数据中心显卡型号 · batch = 一批一起算的请求。全部缩写见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：云上和机器人上，操心的事不一样（2026-11-26）</h3>
+<p><strong>类比：食堂和便当。</strong> 数据中心像大食堂：灶多、电足、几百个人的饭一锅炒，追求的是一小时出多少份。机器人像随身带的便当：只给一个人吃，盒子就这么大，饭必须在饿之前热好，路上还可能没有微波炉。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>数据中心（云）</th>
+<th>机器人（端侧）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次算几个请求</td>
+<td>几十上百个凑一批，一起算</td>
+<td><strong>只有 1 个</strong>：一台机器人、一个观测</td>
+</tr>
+<tr>
+<td>追求什么</td>
+<td>吞吐：每秒总共出多少 token</td>
+<td><strong>时限</strong>：这一次必须在多少 ms 内回来</td>
+</tr>
+<tr>
+<td>能用多少电</td>
+<td>一张卡几百瓦，机房供电散热</td>
+<td>整个计算模组 <strong>15–130 W</strong>（Jetson 系列，第 2 章），还要和电机抢电池</td>
+</tr>
+<tr>
+<td>断网怎么办</td>
+<td>机房内网，基本不断</td>
+<td>机器人会走到信号差的地方，<strong>必须能自己活下去</strong></td>
+</tr>
+<tr>
+<td>算错一次的后果</td>
+<td>用户等一会儿、重试</td>
+<td>机械臂撞到东西、机器人摔倒</td>
+</tr>
+</tbody>
+</table>
+<p>这四行分别对应本书后面几章：一次只算 1 个请求，决定了速度主要被<strong>内存带宽</strong>卡住（第 3 章）；时限决定了要做<strong>调度</strong>（第 6 章）；功率和断网决定了<strong>端云分工</strong>（第 7 章）。</p>
+<p><strong>一句话</strong>：云上追求一锅炒得多，机器人上追求一份饭准时热好、不出事。</p>
+<h3 id="2026-11-26_1">第二步：时限从哪里来：控制节拍和动作块（2026-11-26）</h3>
+<p><strong>类比：跳绳。</strong> 摇绳的人（控制器）每 20 ms 必须摇一下，节拍不能停。教练（模型）不用每摇一下都喊口令，而是一次告诉你接下来 50 下怎么跳。教练只要在你跳完这一串之前想好下一串就行。</p>
+<p>机器人上同时跑着好几种频率（Hz 是每秒多少次，周期 = 1000 ÷ 频率 ms）：</p>
+<p><img alt="一台机器人上同时跑着好几种频率" src="../figures/01-robot-constraints-rates.png" /></p>
+<ul>
+<li><strong>控制器</strong>按固定节拍发动作。π0 用的机器人是 50 Hz，周期 <span class="arithmatex">\(1000 \div 50 = 20\)</span> ms。</li>
+<li><strong>模型</strong>一次不是出 1 个动作，而是出一整块，叫<strong>动作块</strong>（action chunk）。π0 一块是 <span class="arithmatex">\(H = 50\)</span> 步（L255），<span class="arithmatex">\(H\)</span> 读作"H"，是 horizon（视野）的首字母，意思是一次往前规划多少步。</li>
+<li>π0 在 50 Hz 的机器人上<strong>每执行 25 步推理一次</strong>（L938–L940）：两次推理之间隔 <span class="arithmatex">\(25 \times 20 = 500\)</span> ms，推理频率只有 <span class="arithmatex">\(1000 \div 500 = 2\)</span> Hz，控制频率仍是 50 Hz。</li>
+</ul>
+<p><strong>时限就是这样来的</strong>：下一块动作必须在当前这块用完之前回来。π0 每 500 ms 要一次新动作块，推理就得明显快于 500 ms。</p>
+<p><strong>例子：π0 在 RTX 4090 上的耗时分解</strong>（论文 Table I，L942–L951，3 路相机）：</p>
+<table>
+<thead>
+<tr>
+<th>部分</th>
+<th>耗时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图像编码（3 张图）</td>
+<td>14 ms</td>
+</tr>
+<tr>
+<td>观测前向（图像 + 文字过一遍语言模型）</td>
+<td>32 ms</td>
+</tr>
+<tr>
+<td>10 步 flow 出动作</td>
+<td>27 ms</td>
+</tr>
+<tr>
+<td><strong>板上合计</strong></td>
+<td><strong>73 ms</strong></td>
+</tr>
+<tr>
+<td>放到板外、走 Wi‑Fi 多出的网络</td>
+<td>13 ms</td>
+</tr>
+<tr>
+<td>板外合计</td>
+<td>86 ms</td>
+</tr>
+</tbody>
+</table>
+<p>73 ms 只占 500 ms 间隔的 <span class="arithmatex">\(73 \div 500 = 14.6\%\)</span>。在 4090 上很宽裕；换到功率小十倍的机载板子上会怎样，就是第 3、8 章要算的事。</p>
+<p><strong>另一种做法：快慢两套系统。</strong> GR00T N1 把模型拆成两块（L78–L89）：看图想事的 VLM（System 2）在 L40 上 10 Hz，每 100 ms 一次；出动作的部分（System 1）120 Hz，每 8.33 ms 一次。慢的那块想"做什么"，快的那块管"怎么动"，第 6 章细讲。</p>
+<p><strong>一句话</strong>：控制器要准时，模型用动作块一次给很多步来换时间；推理只要赶在这一块用完之前回来。</p>
+<h3 id="1-2026-11-26">第三步：一次只有 1 个请求，意味着什么（2026-11-26）</h3>
+<p><strong>类比：拉货的卡车。</strong> 数据中心一次拉几十箱货（batch 很大），跑一趟的油钱（把权重从内存读出来）摊给很多箱。机器人一次只拉 1 箱，油钱一分不少，全算在这一箱上。</p>
+<p>模型每生成一步，都要把权重从内存读一遍。batch = 1 时，读权重的时间没有人分摊，于是<strong>内存带宽</strong>（每秒能读多少 GB）往往比算力更早成为瓶颈。这正是《深入理解 AI Infra》第 1 章算单 token 账的那套方法（AII §1.3），第 3 章会把它用到 VLA 上。</p>
+<p><strong>一句话</strong>：机器人上 batch 永远是 1，权重读一遍的时间没人分摊，带宽是第一个要算的数。</p>
+<h3 id="2026-11-26_2">第四步：功率、散热和"断网也要活"（2026-11-26）</h3>
+<ul>
+<li><strong>功率</strong>：整个计算模组只有 15–130 W（第 2 章的 Jetson 系列），而且和电机共用一块电池（第 7 章算续航）。</li>
+<li><strong>散热</strong>：机器人外壳里风道小，板子热了会自动降频，推理就变慢。测时延要在<strong>热稳定之后</strong>测（第 7 章）。</li>
+<li><strong>断网</strong>：π0 论文里移动机器人的推理是放在板外、走 Wi‑Fi 做的（L921–L923），平均只多 13 ms。但网络会抖、会断，控制和安全相关的部分必须留在机器人上（第 7 章）。</li>
+<li><strong>安全</strong>：推理超时或出错时，要有兜底：停稳、保持当前姿态、回安全位。这部分在<a href="https://wikieden.github.io/robot-architecture/lessons/10-safety-and-cases.html">机器人软硬件架构第 10 章</a>细讲。</li>
+</ul>
+<p><strong>一句话</strong>：电有限、热会降频、网会断，这三件事在数据中心几乎不用想，在机器人上每件都要提前设计。</p>
+<h3 id="50-hz-2-hz">动画演示：控制 50 Hz，推理只要 2 Hz</h3>
+<p><img alt="控制节拍与推理时限" src="../animations/01-robot-constraints.gif" /></p>
+<p>可交互版：<a href="../animations/01-robot-constraints.html">animations/01-robot-constraints.html</a>（滑块：一次推理要多少 ms）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>绿点是控制器每 20 ms 发的一个动作（第二步）；</li>
+<li>蓝条是一个动作块，50 步够走 1000 ms（第二步）；</li>
+<li>虚线处执行到第 25 步，橙条是一次推理，73 ms 只占 500 ms 的 14.6%（第二步）；</li>
+<li>紫色是放到板外多出的 13 ms 网络（第四步）；</li>
+<li>拖滑块：推理超过 500 ms 时条变红，下一块动作来不及。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步 时限）：一台机器人控制频率 30 Hz，模型一次给 30 步动作，每执行 15 步推理一次，一次推理 120 ms。（a）两次推理之间隔多少 ms？（b）推理占这段间隔的百分之几？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一、三步）：同一个模型，在数据中心一次算 64 个请求，在机器人上一次算 1 个。读一遍权重的时间，分到每个请求头上，两边差几倍？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：说出两个"数据中心几乎不用操心、机器人上必须提前设计"的问题，各举一个后果。</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>云上一锅炒得多，车上一份要准时；<br />
+动作成块换时间，块没用完就回来；<br />
+批量为一没人摊，带宽先算别忘掉；<br />
+电热网断都要想，出错先要能停好。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p><a href="../review.html">E01</a>（周期与推理间隔怎么算）、<a href="../review.html">E02</a>（π0 在 4090 上的耗时分解）</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ π0 论文</td>
+<td><code>vla-deep-dive/materials/text/papers/pi0-2410.24164.txt</code> Table I L942–L951、L918–L940</td>
+<td>一个真实 VLA 的耗时分解和推理节拍</td>
+</tr>
+<tr>
+<td>★ VLA 讲义 · 动作分块</td>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/03-action-chunking.html">vla-deep-dive 第 3 章</a></td>
+<td>动作块为什么能换来时间</td>
+</tr>
+<tr>
+<td>GR00T N1 论文</td>
+<td><code>vla-deep-dive/materials/text/papers/gr00t-n1-2503.14734.txt</code> L78–L89</td>
+<td>快慢两套系统的频率</td>
+</tr>
+<tr>
+<td>机器人软硬件架构 · 分层闭环</td>
+<td><a href="https://wikieden.github.io/robot-architecture/lessons/01-layered-loops.html">robot-system-architecture 第 1 章</a></td>
+<td>各层频率为什么每往下一层快约 10 倍</td>
+</tr>
+<tr>
+<td>《深入理解 AI Infra》第 12 章</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/12-端边云协同.md</code> §12.1.5</td>
+<td>手机上的同类算法，本书第 3 章会用到</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>频率和周期互为倒数</strong>：周期（ms）= 1000 ÷ 频率（Hz）。50 Hz ↔ 20 ms，120 Hz ↔ 8.33 ms。</li>
+<li><strong>占比</strong>：推理时间 ÷ 推理间隔，表示这段时间里有几成在等模型。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(T = 1000 / f\)</span></td>
+<td>频率 <span class="arithmatex">\(f\)</span>（Hz）对应的周期 <span class="arithmatex">\(T\)</span>（ms）</td>
+</tr>
+<tr>
+<td>推理间隔 <span class="arithmatex">\(= s \times T\)</span></td>
+<td>每执行 <span class="arithmatex">\(s\)</span> 步推理一次</td>
+</tr>
+<tr>
+<td>占比 <span class="arithmatex">\(=\)</span> 推理时间 <span class="arithmatex">\(\div\)</span> 推理间隔</td>
+<td>推理占了这段时间的几成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch01_robot_constraints.py</code>，配套测试 <code>tests/test_chapters.py::test_ch01</code>，notebook 在 <code>notebooks/ch01_robot_constraints.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch01_robot_constraints.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch01</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（π0 的数字来自论文 Table I，GR00T N1 的频率来自论文 §2）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第二步 π0 耗时分解</td>
+<td>三段相加</td>
+<td><code>sum(PI0_PARTS_MS.values())</code></td>
+<td>73 ms；板外 86 ms</td>
+</tr>
+<tr>
+<td>第二步 控制周期</td>
+<td><span class="arithmatex">\(1000 / 50\)</span></td>
+<td><code>period_ms(50)</code></td>
+<td>20 ms</td>
+</tr>
+<tr>
+<td>第二步 推理间隔</td>
+<td><span class="arithmatex">\(25 \times 20\)</span></td>
+<td><code>infer_interval_ms(25, 50)</code></td>
+<td>500 ms → 2 Hz</td>
+</tr>
+<tr>
+<td>第二步 推理占比</td>
+<td><span class="arithmatex">\(73 / 500\)</span></td>
+<td><code>busy_fraction(73, 500)</code></td>
+<td>14.6%</td>
+</tr>
+<tr>
+<td>第二步 GR00T N1 System 1</td>
+<td><span class="arithmatex">\(1000 / 120\)</span></td>
+<td><code>period_ms(120)</code></td>
+<td>8.33 ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def period_ms(hz):
+    return 1000.0 / hz                          # 每秒 hz 次 → 每次隔 1000 / hz 毫秒
+
+def infer_interval_ms(steps_between, control_hz):
+    return steps_between * period_ms(control_hz)  # 执行完这么多步才推理下一次
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li>单位统一用毫秒：频率进来先换成周期，后面全部是 ms 相加相除，不容易错。</li>
+<li>论文 Table I 是在 RTX 4090 上测的，不是在机器人的机载板子上；搬到 Jetson 上会慢好几倍，第 3、8 章再算。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把控制频率改成 100 Hz，看推理间隔和占比怎么变。</li>
+<li>把 <code>PI0_PARTS_MS</code> 里 10 步 flow 的 27 ms 减半（假设只用 5 步），看板上合计变成多少。</li>
+</ul><nav class="pager"><span></span><a href="02-edge-chips.html">第 2 章 · 端侧芯片：看懂 Jetson 的三个数 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

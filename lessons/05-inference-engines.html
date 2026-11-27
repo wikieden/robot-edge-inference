@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 5 章 · 推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html" class="cur"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="5-pytorch-tensorrt-cuda-graph">第 5 章 · 推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</h1><div class="run"><a class="btn" href="../animations/05-inference-engines.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch05_inference_engines.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch05_inference_engines.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch05_inference_engines.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：训练时写的 PyTorch 模型，直接拿到 Jetson 上跑为什么慢？TensorRT、CUDA Graph 各解决了什么？GR00T 2 在 Thor 上从 720 ms 削到 124 ms，每一步省了多少？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/04-quantization.html">第 4 章 量化</a> · 下一章：<a href="../lessons/06-realtime-scheduling.html">第 6 章 实时调度</a><br />
+对应原文：GR00T 2 白皮书 Fig. 19 / Tab. 27（<code>gr00t2/materials/text/gr00t2-whitepaper.txt</code> §4.6 L1414–L1520，讲义整理在 <a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a>）；《深入理解 AI Infra》§5.5.2 <code>ai-infra/materials/ai-infra-book/manuscripts/05-算子与运行时.md</code> L796–L812（CUDA Graph）；JetPack 6.2 博客的 DLA 算力（<a href="../lessons/appendix-sources.html">附录 · 材料来源</a>）<br />
+本章缩写：TensorRT = NVIDIA 的推理优化引擎（Tensor 张量 / RT = RunTime 运行时）· ONNX = Open Neural Network Exchange（开放 / 神经网络 / 交换格式）· CUDA = Compute Unified Device Architecture（计算 / 统一 / 设备 / 架构）· kernel = 在 GPU 上跑的一个小程序 · launch = 提交一次 kernel · eager = 即时执行（PyTorch 默认，一行代码算一次）· DLA = Deep Learning Accelerator（深度学习 / 加速器）· µs = microsecond（微秒，千分之一毫秒）· TensorRT-LLM / TensorRT Edge-LLM = NVIDIA 面向大语言模型的推理库（后者面向端侧）· MLC = Machine Learning Compilation（机器学习 / 编译，一个开源推理框架）。全部缩写见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="pytorch-2026-11-26">第一步：PyTorch 默认是一行一行算的（2026-11-26）</h3>
+<p><strong>类比：一件件下单 vs 一次下整单。</strong> eager 模式像去超市每拿一件东西就去收银台结一次账：东西本身拿得很快，排队结账的时间却加起来很长。CPU 每算一个小步骤（一个 kernel），都要单独提交给 GPU 一次（launch）。</p>
+<p>《深入理解 AI Infra》§5.5.2（L796–L812）的实测：3 次 FFN 普通提交是 <strong>18 次 kernel launch</strong>；录成 CUDA Graph 后，CPU 只要 <strong>3 次 graph launch</strong>，GPU 仍然执行 18 个 kernel。</p>
+<p><strong>机器人上这件事更严重</strong>：batch = 1 时每个 kernel 都很小，GPU 很快算完，就在等 CPU 交下一个；Jetson 的 CPU 是 ARM 核，又比服务器 CPU 慢。</p>
+<p><strong>例子</strong>（每次 launch 5 µs、一步 2000 个 kernel 是编的，用来说明量级）：<span class="arithmatex">\(2000 \times 5\ \mu\text{s} = 10\)</span> ms。光提交就要 10 ms，一个 50 Hz 的控制周期才 20 ms。</p>
+<p><strong>一句话</strong>：eager 模式每个小算子都要 CPU 提交一次，batch = 1 时 GPU 常常在等 CPU。</p>
+<h3 id="tensorrt2026-11-26">第二步：TensorRT：把模型"编译"成引擎（2026-11-26）</h3>
+<p><strong>类比：把菜谱交给中央厨房。</strong> 你写的菜谱一步一步很细（PyTorch 代码），中央厨房拿到后，会把能一起做的步骤合并（切菜和腌制一起），给每道工序挑最顺手的工具，定好用多少火力（精度），最后印成一张固定流程卡（engine 文件），以后照卡做就行。</p>
+<p><img alt="从训练好的 PyTorch 模型到 Jetson 上跑的引擎" src="../figures/05-inference-engines-trt-pipeline.png" /></p>
+<p>TensorRT 构建时做三件事：</p>
+<ol>
+<li><strong>合并相邻算子</strong>（融合）：比如矩阵乘 + 加偏置 + 激活函数合成一个 kernel，中间结果不用写回内存；</li>
+<li><strong>挑 kernel</strong>：同一个算子有很多种实现，TensorRT 在你的 GPU 上逐个试，选最快的；</li>
+<li><strong>定精度</strong>：允许哪些层用 FP16、INT8、FP8。</li>
+</ol>
+<p><strong>实际写法</strong>（真实 API，模型和输入形状换成你自己的）：</p>
+<pre><code class="language-python">import torch
+
+policy = load_policy().eval().cuda()                  # 你的策略网络
+image = torch.randn(1, 3, 224, 224, device=&quot;cuda&quot;)    # 示例输入，形状要和部署时一致
+torch.onnx.export(policy, (image,), &quot;policy.onnx&quot;,
+                  input_names=[&quot;image&quot;], output_names=[&quot;actions&quot;], opset_version=17)
+</code></pre>
+<pre><code class="language-bash"># 在 Jetson 上构建引擎（引擎和 GPU 型号、TensorRT 版本绑定，要在目标机上建）
+trtexec --onnx=policy.onnx --saveEngine=policy.engine --fp16
+# Orin 上把能放的层交给 DLA，放不下的退回 GPU
+trtexec --onnx=policy.onnx --saveEngine=policy_dla.engine --fp16 --useDLACore=0 --allowGPUFallback
+</code></pre>
+<p><strong>两个坑</strong>：</p>
+<ul>
+<li><strong>引擎不能拷来拷去</strong>：在 x86 上建的引擎不能直接在 Jetson 上用；JetPack 升级换了 TensorRT 版本，也要重新构建。</li>
+<li><strong>不是所有算子都能导出</strong>：自定义算子、动态控制流（比如 flow 的循环步数在运行时决定）导出 ONNX 会失败或变慢，常见做法是只把重的部分（视觉编码器、Transformer 主干）编成引擎。</li>
+</ul>
+<p><strong>DLA</strong>：Orin NX 16GB（Super）官方给的 DLA 算力是 80 INT8 TOPS（稀疏），和 GPU 分开算。卷积网络（比如相机的检测模型）可以放到 DLA 上，把 GPU 留给 VLA。</p>
+<p><strong>一句话</strong>：TensorRT 把模型合并、挑 kernel、定精度，编成只能在这台机器上用的引擎。</p>
+<h3 id="gr00t-2-thor-2026-11-26">第三步：GR00T 2 在 Thor 上一层层削延迟（2026-11-26）</h3>
+<p>GR00T 2 白皮书在 Jetson Thor（120 W 模式）上测了 G1 人形机器人用的 Turbo 版本，每加一项优化记一次（Fig. 19，500 次中位数）：</p>
+<table>
+<thead>
+<tr>
+<th>累计改动</th>
+<th>耗时</th>
+<th>这一步省了</th>
+<th>占基线</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基线：eager BF16 PyTorch</td>
+<td>720.41 ms</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>+ 运行时优化（复用文本特征等）</td>
+<td>614.53 ms</td>
+<td>105.88 ms</td>
+<td>14.7%</td>
+</tr>
+<tr>
+<td><strong>+ TensorRT</strong></td>
+<td><strong>256.12 ms</strong></td>
+<td><strong>358.41 ms</strong></td>
+<td><strong>49.8%</strong></td>
+</tr>
+<tr>
+<td>+ CUDA Graph</td>
+<td>254.00 ms</td>
+<td>2.12 ms</td>
+<td>0.3%</td>
+</tr>
+<tr>
+<td>+ FP8 混合精度</td>
+<td>182.22 ms</td>
+<td>71.78 ms</td>
+<td>10.0%</td>
+</tr>
+<tr>
+<td>+ 去噪步数减半</td>
+<td>123.97 ms</td>
+<td>58.25 ms</td>
+<td>8.1%</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="GR00T 2 在 Jetson Thor 上一层层削延迟" src="../figures/05-inference-engines-thor-waterfall.png" /></p>
+<p>合计 <span class="arithmatex">\(720.41 \div 123.97 = 5.81\)</span> 倍。三个看点：</p>
+<ol>
+<li><strong>TensorRT 一步省了将近一半</strong>，是最大的单项；</li>
+<li><strong>CUDA Graph 只省 2 ms</strong>：因为 TensorRT 已经把 kernel 合并得很少了，剩下的提交开销不多。CUDA Graph 的收益取决于前面做了多少融合，没做 TensorRT 时它会更有用；</li>
+<li><strong>FP8（第 4 章）和少步</strong>又各省一成左右，但这两项会改变输出，要过第 4 章第四步的验收。</li>
+</ol>
+<p><strong>一句话</strong>：TensorRT 是最大的一刀；CUDA Graph 在融合之后收益变小；量化和少步要验收。</p>
+<h3 id="cuda-graph-llm-2026-11-26">第四步：CUDA Graph 和 LLM 推理库（2026-11-26）</h3>
+<p><strong>CUDA Graph</strong>：把一整步推理的所有 kernel 录下来，以后 CPU 只提交一次，GPU 照录好的顺序跑。PyTorch 里的真实写法：</p>
+<pre><code class="language-python">g = torch.cuda.CUDAGraph()
+static_in = torch.randn(1, 3, 224, 224, device=&quot;cuda&quot;)
+with torch.cuda.graph(g):                 # 录一遍
+    static_out = policy(static_in)
+static_in.copy_(new_image)                # 以后每步：把新输入拷进同一块内存
+g.replay()                                # 一次提交，整步重放；结果在 static_out
+</code></pre>
+<p>限制：输入形状和内存地址要固定（所以用 <code>copy_</code> 拷进同一块内存）；有分支、形状会变的部分录不进去。<code>torch.compile(mode="reduce-overhead")</code> 会自动帮你用 CUDA Graph。</p>
+<p><strong>LLM 类的部分</strong>（VLA 里的语言模型主干）：可以用专门的推理库，它们自带 KV 缓存管理、量化 kernel 和 CUDA Graph。NVIDIA 的 JetPack 6.2 博客用 <strong>MLC</strong> 在 Orin 上测 INT4 语言模型；T4000 博客介绍了面向端侧的 <strong>TensorRT Edge-LLM</strong>。具体用哪个，看你的模型结构它们支不支持。</p>
+<p><strong>一句话</strong>：CUDA Graph 把一整步录下来一次提交，前提是形状固定；语言模型主干可以交给专门的 LLM 推理库。</p>
+<h3 id="vs-thor">动画演示：逐个提交 vs 一次提交，以及 Thor 上的瀑布</h3>
+<p><img alt="逐个提交 vs CUDA Graph" src="../animations/05-inference-engines.gif" /></p>
+<p>可交互版：<a href="../animations/05-inference-engines.html">animations/05-inference-engines.html</a>（滑块：每次提交要几 µs）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>上面两行：紫色是 CPU 提交，绿色是 GPU 执行。eager 模式下绿色之间有空隙，GPU 在等（第一步）；</li>
+<li>TensorRT 合并后 kernel 变少变大（第二步）；</li>
+<li>CUDA Graph 只剩一个紫块，GPU 连续执行（第四步）；</li>
+<li>下半部分逐行出现 Thor 的实测，橙色是 TensorRT 那一步（第三步）；</li>
+<li>拖滑块：提交越慢，eager 模式里空隙越大。上半部分的时间是示意，不是实测。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第三步）：在 Thor 的瀑布里，FP8 和去噪步数减半两步一共省了多少 ms？占基线 720.41 ms 的百分之几？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第一、四步）：一个模型一步有 800 个 kernel，每次 launch 8 µs。eager 模式下光提交要多少 ms？录成 CUDA Graph 后呢？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第二步）：同事在自己的 x86 工作站上用 trtexec 建好了 <code>policy.engine</code>，拷到 Jetson 上加载失败。最可能的原因是什么？怎么改？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>一件一结账太慢，整单提交 GPU 不等；<br />
+合并挑核定精度，引擎认机不认人；<br />
+TensorRT 砍一半，Graph 收尾剩不多；<br />
+量化少步还要验，形状固定才能录。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p><a href="../review.html">E09</a>（TensorRT 构建时做哪三件事）、<a href="../review.html">E10</a>（Thor 瀑布里最大的一步）</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ GR00T 2 部署章</td>
+<td><a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a></td>
+<td>完整的逐项提速瀑布、各本体汇总、怎么验收</td>
+</tr>
+<tr>
+<td>★ 《深入理解 AI Infra》§5.5</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/05-算子与运行时.md</code> L768–L905</td>
+<td>主机提交与加速器计算的重叠、CUDA Graph、动态形状、persistent kernel</td>
+</tr>
+<tr>
+<td>AISPE 第 12、14 章</td>
+<td><code>ai-infra/materials/ai-systems-performance-engineering/docs/chapters/ch12.md</code>（CUDA 图）、<code>ch14.md</code>（PyTorch 编译器）</td>
+<td>工程视角的 CUDA Graph 和 torch.compile</td>
+</tr>
+<tr>
+<td>《深入理解 AI Infra》§5.3</td>
+<td><code>05-算子与运行时.md</code> L339–L480</td>
+<td>算子融合为什么能省读写</td>
+</tr>
+<tr>
+<td>CUDA 编程讲义</td>
+<td><a href="https://wikieden.github.io/cuda-to-tensor-core/lessons/index.html">cuda-programming 讲义目录</a></td>
+<td>kernel、launch 的底层</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>提交开销</strong>：CPU 提交总时间 ≈ kernel 数 × 每次 launch 时间；GPU 每个 kernel 越短，这部分占比越大。</li>
+<li><strong>累计瀑布</strong>：每一步省的 = 上一行 − 这一行；占基线的比例 = 省的 ÷ 第一行。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提交时间 <span class="arithmatex">\(= n_{\text{kernel}} \times t_{\text{launch}}\)</span></td>
+<td>eager 模式下 CPU 光提交要多久</td>
+</tr>
+<tr>
+<td>省的 <span class="arithmatex">\(=\)</span> 上一步 <span class="arithmatex">\(-\)</span> 这一步</td>
+<td>瀑布里每一项的收益</td>
+</tr>
+<tr>
+<td>加速倍数 <span class="arithmatex">\(=\)</span> 基线 <span class="arithmatex">\(\div\)</span> 最终</td>
+<td>720.41 ÷ 123.97 = 5.81</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch05_inference_engines.py</code>，配套测试 <code>tests/test_chapters.py::test_ch05</code>，notebook 在 <code>notebooks/ch05_inference_engines.ipynb</code>。Mac 上直接能跑，不需要 GPU（讲解里的 TensorRT、CUDA Graph 写法要在 NVIDIA GPU 上跑 <code>[GPU]</code>）：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch05_inference_engines.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch05</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（Thor 的数来自 GR00T 2 白皮书 Fig. 19；5 µs、2000 个 kernel 是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第三步 每步省了多少</td>
+<td>上一行 − 这一行</td>
+<td><code>savings(THOR_WATERFALL)</code></td>
+<td>TensorRT 省 358.41 ms，占 49.8%</td>
+</tr>
+<tr>
+<td>第三步 总加速</td>
+<td>基线 ÷ 最终</td>
+<td><code>720.41 / 123.97</code></td>
+<td>5.81 倍</td>
+</tr>
+<tr>
+<td>第一步 提交开销</td>
+<td><span class="arithmatex">\(2000 \times 5\)</span> µs</td>
+<td><code>host_launch_ms(2000, 5)</code></td>
+<td>10 ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def savings(waterfall):
+    base = waterfall[0][1]
+    return [(name, prev - cur, (prev - cur) / base)          # 比上一行省了多少、占基线几成
+            for (_, prev), (name, cur) in zip(waterfall, waterfall[1:])]
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li>瀑布是<strong>累计</strong>的：每一行都包含前面所有优化。如果换一个顺序做（先 FP8 再 TensorRT），每一项的收益会变，所以"TensorRT 省了一半"是在这个顺序下的说法。</li>
+<li>白皮书给的是 500 次的中位数；控制回路更关心 p99（第 6 章），中位数快不代表最坏情况也快。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>THOR_WATERFALL</code> 换成 gr00t2 第 10 章里 RTX 5090 那一列（224.73 → 38.40），看 TensorRT 那一步占比是不是也最大。</li>
+<li>把 <code>host_launch_ms</code> 的每次 launch 改成 2 µs，看 2000 个 kernel 还要多久。</li>
+</ul><nav class="pager"><a href="04-quantization.html">← 第 4 章 · 量化：省内存、省带宽，但不一定变快</a><a href="06-realtime-scheduling.html">第 6 章 · 实时调度：动作块、异步推理、快慢两套系统 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

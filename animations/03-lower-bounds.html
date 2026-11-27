@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>读权重的带宽下限</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 03 章 · OpenVLA 一步要把 15 GB 权重读 7 遍：带宽决定最快多少 Hz</h1>
+<p class="sub">配套讲义：<a href="../lessons/03-lower-bounds.html">第 3 章 · 先算下限：读权重要多久、算一遍要多久、放不放得下</a>。OpenVLA bf16 推理占 15 GB、int4 占 7.0 GB、每步吐 7 个动作 token（论文）；带宽：RTX 4090 1008、Thor 273、AGX Orin 204.8 GB/s。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="bw">自己拖：内存带宽（GB/s）</label><input type="range" id="bw" min="50" max="1100" step="10" value="204.8"><span id="bwv">205</span></div>
+<p class="note">看点：① 每吐一个 token 都要把全部权重从内存读一遍；② 7 个 token 就读 7 遍；③ 时间下限 = 7 × 字节 ÷ 带宽；④ 4090 上限 9.6 Hz，实测约 6 Hz；⑤ 同样的模型搬到 AGX Orin 只剩 1.95 Hz，int4 也只有 4.18 Hz。滑块：改带宽，看 bf16 和 int4 的上限。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+const ST=[{cap:'吐第 1 个动作 token：15 GB 权重读一遍',s:1},{cap:'7 个 token 就要读 7 遍',s:7},
+ {cap:'RTX 4090：7 × 15 ÷ 1008 = 104 ms → 最多 9.6 Hz（实测约 6 Hz）',s:8,bw:1008},
+ {cap:'AGX Orin：7 × 15 ÷ 204.8 = 513 ms → 最多 1.95 Hz',s:8,bw:204.8},{cap:'int4 只读 7.0 GB：AGX Orin 上 239 ms → 4.18 Hz',s:9,bw:204.8}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function tokens(n,gb){const x0=60,y=80;txt(`每个 token 读 ${gb} GB`,{x:x0,y:y-12,class:'m'},sv);
+ for(let i=0;i<7;i++){const on=i<n;el('rect',{x:x0+i*82,y,width:74,height:60,rx:6,fill:on?'var(--accent-bg)':'none',stroke:on?'var(--accent)':'var(--line)'},sv);
+  txt(`token ${i+1}`,{x:x0+i*82+37,y:y+26,'text-anchor':'middle',class:'m'},sv);if(on)txt(gb+' GB',{x:x0+i*82+37,y:y+46,'text-anchor':'middle',class:'big'},sv)}}
+function result(bw,gb,y){const t=7*gb/bw*1000,hz=1000/t;txt(`${gb} GB × 7 ÷ ${bw} GB/s = ${t.toFixed(1)} ms`,{x:60,y,class:'big'},sv);
+ const w=Math.min(10,hz)/10*480;el('rect',{x:60,y:y+10,width:w,height:22,rx:4,fill:gb>10?'var(--warm)':'var(--teal)',opacity:.8},sv);
+ txt(`最多 ${hz.toFixed(2)} Hz`,{x:70+w,y:y+27,class:'big'},sv)}
+function draw(){clear(sv);
+ if(custom!==null){txt(`带宽 ${custom} GB/s 时的上限`,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);tokens(7,'15 / 7.0');result(custom,15,190);result(custom,7.0,270);return}
+ const f=ST[FR[k]];txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);
+ tokens(Math.min(f.s,7),f.s===9?7.0:15);if(f.bw)result(f.bw,f.s===9?7.0:15,200);
+ if(f.s===8&&f.bw===1008){el('line',{x1:60+6/10*480,y1:200,x2:60+6/10*480,y2:240,stroke:'var(--bad)','stroke-width':2,'stroke-dasharray':'4 3'},sv);txt('实测约 6 Hz',{x:66+6/10*480,y:256,class:'m'},sv)}}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('bw').oninput=e=>{ANIM.stop();custom=+e.target.value;$('bwv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1500);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

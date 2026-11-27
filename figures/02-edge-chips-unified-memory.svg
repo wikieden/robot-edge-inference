@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="330" viewBox="0 0 820 330">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="16.0" y="26.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold">台式机两块内存，Jetson 一块大家共用</text>
+<text x="16.0" y="320.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">统一内存省掉了 CPU ↔ GPU 的拷贝，代价是系统、ROS 2、相机缓冲都从同一块里拿。</text>
+<rect x="20.0" y="50.0" width="380.0" height="240.0" rx="10" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.55"/>
+<text x="30.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#6b7280" text-anchor="start" font-weight="bold">台式机 / 工控机 + 独显</text>
+<rect x="40.0" y="90.0" width="140.0" height="54.0" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" opacity="1"/>
+<text x="110.0" y="113.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">CPU</text>
+<text x="110.0" y="130.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">主机内存 DDR</text>
+<rect x="240.0" y="90.0" width="140.0" height="54.0" rx="8" fill="#e0ecff" stroke="#2563eb" stroke-width="1.4" opacity="1"/>
+<text x="310.0" y="113.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">GPU</text>
+<text x="310.0" y="130.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">显存 GDDR / HBM</text>
+<line x1="180.0" y1="117.0" x2="240.0" y2="117.0" stroke="#4b5563" stroke-width="1.6"/>
+<polygon points="240.0,117.0 232.1,121.2 232.1,112.8" fill="#4b5563" stroke="#4b5563" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<polygon points="180.0,117.0 187.9,112.8 187.9,121.2" fill="#4b5563" stroke="#4b5563" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="177.8" y="100.5" width="64.3" height="16.5" rx="3" fill="#ffffff" stroke="none" stroke-width="1.4" opacity="0.9"/>
+<text x="210.0" y="112.5" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">PCIe 拷贝</text>
+<text x="210.0" y="200.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">模型放显存，图像先在主机内存，</text>
+<text x="210.0" y="220.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal">每帧要拷过 PCIe 才能给 GPU 用</text>
+<rect x="420.0" y="50.0" width="380.0" height="240.0" rx="10" fill="#e0ecff" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.55"/>
+<text x="430.0" y="68.0" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12" fill="#2563eb" text-anchor="start" font-weight="bold">Jetson（Orin / Thor）</text>
+<rect x="450.0" y="210.0" width="320.0" height="50.0" rx="8" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.4" opacity="1"/>
+<text x="610.0" y="231.3" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="13.5" fill="#1f2937" text-anchor="middle" font-weight="bold">一块 LPDDR5 / 5X 统一内存</text>
+<text x="610.0" y="248.8" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="11.5" fill="#4b5563" text-anchor="middle" font-weight="normal">Orin 64 GB · 204.8 GB/s ｜ Thor 128 GB · 273 GB/s</text>
+<rect x="450.0" y="92.0" width="74.0" height="50.0" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" opacity="1"/>
+<text x="487.0" y="113.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">CPU</text>
+<text x="487.0" y="129.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#4b5563" text-anchor="middle" font-weight="normal">系统 · ROS 2</text>
+<line x1="487.0" y1="142.0" x2="487.0" y2="210.0" stroke="#6b7280" stroke-width="1.6"/>
+<polygon points="487.0,210.0 482.8,202.1 491.2,202.1" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="532.0" y="92.0" width="74.0" height="50.0" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" opacity="1"/>
+<text x="569.0" y="113.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">GPU</text>
+<text x="569.0" y="129.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#4b5563" text-anchor="middle" font-weight="normal">模型</text>
+<line x1="569.0" y1="142.0" x2="569.0" y2="210.0" stroke="#6b7280" stroke-width="1.6"/>
+<polygon points="569.0,210.0 564.8,202.1 573.2,202.1" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="614.0" y="92.0" width="74.0" height="50.0" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" opacity="1"/>
+<text x="651.0" y="113.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">DLA</text>
+<text x="651.0" y="129.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#4b5563" text-anchor="middle" font-weight="normal">卷积网络</text>
+<line x1="651.0" y1="142.0" x2="651.0" y2="210.0" stroke="#6b7280" stroke-width="1.6"/>
+<polygon points="651.0,210.0 646.8,202.1 655.2,202.1" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<rect x="696.0" y="92.0" width="74.0" height="50.0" rx="8" fill="#ffffff" stroke="#9ca3af" stroke-width="1.4" opacity="1"/>
+<text x="733.0" y="113.7" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="12.5" fill="#1f2937" text-anchor="middle" font-weight="bold">相机 ISP</text>
+<text x="733.0" y="129.9" font-family="'PingFang SC','Hiragino Sans GB','Noto Sans CJK SC','Microsoft YaHei',sans-serif" font-size="10.5" fill="#4b5563" text-anchor="middle" font-weight="normal">图像</text>
+<line x1="733.0" y1="142.0" x2="733.0" y2="210.0" stroke="#6b7280" stroke-width="1.6"/>
+<polygon points="733.0,210.0 728.8,202.1 737.2,202.1" fill="#6b7280" stroke="#6b7280" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+</svg>

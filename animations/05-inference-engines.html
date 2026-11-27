@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>逐个提交 vs CUDA Graph</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 05 章 · 推理引擎：CPU 逐个提交 kernel 太慢，TensorRT 合并、CUDA Graph 一次提交</h1>
+<p class="sub">配套讲义：<a href="../lessons/05-inference-engines.html">第 5 章 · 推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a>。下半部分是 GR00T 2 在 Jetson Thor（120 W）上的实测（白皮书 Fig. 19）；上半部分每次提交多长、kernel 多长是编的示意。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 400"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="u">自己拖：每次提交要几 µs（ARM CPU 慢时更大）</label><input type="range" id="u" min="1" max="20" step="1" value="5"><span id="uv">5</span></div>
+<p class="note">看点：① eager 模式：CPU 每提交一个 kernel，GPU 才能算一个，中间有空隙；② TensorRT 把相邻算子合并，kernel 变少变大；③ CUDA Graph 把一整步录下来，CPU 只提交一次；④ 下半部分：Thor 上逐项削延迟，TensorRT 一步省 358 ms，最大。滑块：提交越慢，eager 模式里 GPU 空等越多。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');
+const WF=[['基线 eager',720.41],['+ 运行时',614.53],['+ TensorRT',256.12],['+ CUDA graph',254.00],['+ FP8',182.22],['+ 步数减半',123.97]];
+const ST=[{cap:'eager：CPU 提交一个，GPU 算一个',m:0,w:0},{cap:'TensorRT：相邻算子合并，kernel 变少',m:1,w:0},{cap:'CUDA Graph：整步录下来，只提交一次',m:2,w:0},
+ {cap:'Thor 实测：基线 720 ms',m:2,w:1},{cap:'+ TensorRT：省 358 ms，最大的一步',m:2,w:3},{cap:'全部做完：124 ms，快 5.8 倍',m:2,w:6}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function timeline(mode,us){const x0=110,sc=4.2;txt('CPU 提交',{x:x0-8,y:78,'text-anchor':'end',class:'m'},sv);txt('GPU 执行',{x:x0-8,y:118,'text-anchor':'end',class:'m'},sv);
+ const n=mode===0?12:6,kl=mode===0?6:12;let t=0;
+ if(mode===2){el('rect',{x:x0,y:64,width:us*sc,height:20,rx:3,fill:'var(--purple)'},sv);t=us;for(let i=0;i<n;i++){el('rect',{x:x0+t*sc,y:104,width:kl*sc-2,height:20,rx:3,fill:'var(--teal)'},sv);t+=kl}}
+ else{let g=0;for(let i=0;i<n;i++){el('rect',{x:x0+g*sc,y:64,width:us*sc-1,height:20,rx:3,fill:'var(--purple)'},sv);g+=us;const st=Math.max(g,t);el('rect',{x:x0+st*sc,y:104,width:kl*sc-2,height:20,rx:3,fill:'var(--teal)'},sv);t=st+kl}}
+ txt(`一步共 ${t.toFixed(0)} µs（示意）`,{x:x0+t*sc+8,y:118,class:'m'},sv)}
+function waterfall(n){const x0=150,w=460,y0=170;for(let i=0;i<n;i++){const [lab,ms]=WF[i],y=y0+i*34;
+ txt(lab,{x:x0-8,y:y+18,'text-anchor':'end',class:'m'},sv);el('rect',{x:x0,y:y+4,width:ms/720.41*w,height:20,rx:3,fill:lab.includes('TensorRT')?'var(--warm)':'var(--accent)',opacity:.8},sv);
+ txt(ms.toFixed(2)+' ms',{x:x0+ms/720.41*w+6,y:y+19,class:'m'},sv)}}
+function draw(){clear(sv);
+ if(custom!==null){txt(`每次提交 ${custom} µs`,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);timeline(0,custom);waterfall(6);return}
+ const f=ST[FR[k]];txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);timeline(f.m,5);waterfall(f.w)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('u').oninput=e=>{ANIM.stop();custom=+e.target.value;$('uv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1500);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

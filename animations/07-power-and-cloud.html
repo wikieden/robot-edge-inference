@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>板外推理的拖尾</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 07 章 · 放到云上平均只多 13 ms，可怕的是拖尾和丢包</h1>
+<p class="sub">配套讲义：<a href="../lessons/07-power-and-cloud.html">第 7 章 · 功耗、散热和端云分工</a>。π0 走 Wi‑Fi 板外推理多 13 ms（论文 Table I）；拖尾平均 5 ms、丢包 2%、重传多等 200 ms 是编的，随机数固定种子 0。p50 = 50th percentile（中位数），p99 = 第 99 百分位。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="p">自己拖：丢包率（%）</label><input type="range" id="p" min="0" max="10" step="0.5" value="2"><span id="pv">2</span></div>
+<p class="note">看点：① 每个格子是一次请求的网络时间，大多挤在 13–25 ms；② 中位数 p50 只比 13 ms 多一点；③ 2% 的请求丢包重传，多等 200 ms，堆在最右边；④ p99 被这 2% 拉到 200 ms 以上——控制回路要按 p99 设计。滑块：丢包率越高，p99 越早被拉上去。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');let N=0,custom=null,data=[];
+function sample(loss){seed(1);const out=[];for(let i=0;i<1000;i++){let t=13-5*Math.log(1-rnd()+1e-12);if(rnd()<loss)t+=200;out.push(t)}return out}
+function pct(xs,p){const s=[...xs].sort((a,b)=>a-b);return s[Math.min(s.length-1,Math.floor(p/100*s.length))]}
+function hist(xs,show){const X0=60,W=580,xs_=v=>X0+Math.min(v,260)/260*W,bins=new Array(52).fill(0);xs.slice(0,show).forEach(v=>bins[Math.min(51,Math.floor(Math.min(v,259)/5))]++);
+ const mx=Math.max(20,...bins);bins.forEach((c,i)=>{if(!c)return;const h=c/mx*190;el('rect',{x:X0+i*W/52,y:290-h,width:W/52-1,height:h,fill:i*5>=200?'var(--bad)':'var(--accent)',opacity:.8},sv)});
+ el('line',{x1:X0,y1:290,x2:X0+W,y2:290,stroke:'var(--muted)'},sv);[0,50,100,150,200,250].forEach(v=>txt(v+' ms',{x:xs_(v),y:310,'text-anchor':'middle',class:'m'},sv));
+ return xs_}
+function lines(xs,xs_){const p50=pct(xs,50),p99=pct(xs,99);[[p50,'p50','var(--good)'],[p99,'p99','var(--bad)']].forEach(([v,n,c],i)=>{
+ el('line',{x1:xs_(v),y1:80,x2:xs_(v),y2:290,stroke:c,'stroke-width':2,'stroke-dasharray':'5 3'},sv);txt(`${n} = ${v.toFixed(1)} ms`,{x:xs_(v)+(i?-6:6),y:74+i*0,'text-anchor':i?'end':'start',class:'big'},sv)})}
+const ST=[{cap:'前 100 次请求的网络时间',n:100},{cap:'1000 次：大多挤在 13–25 ms',n:1000},{cap:'中位数 p50 只比 13 ms 多一点',n:1000,l:1},{cap:'2% 丢包重传，p99 被拉到 200 ms 以上',n:1000,l:1}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0;
+function draw(){clear(sv);
+ if(custom!==null){const xs=sample(custom/100);txt(`丢包率 ${custom}%`,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);lines(xs,hist(xs,1000));return}
+ const f=ST[FR[k]],xs=sample(0.02);txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);const m=hist(xs,f.n);if(f.l)lines(xs,m)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('p').oninput=e=>{ANIM.stop();custom=+e.target.value;$('pv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

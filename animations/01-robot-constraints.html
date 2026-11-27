@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>控制节拍与推理时限</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 01 章 · 控制 50 Hz，推理只要 2 Hz：动作块怎么把两者接起来</h1>
+<p class="sub">配套讲义：<a href="../lessons/01-robot-constraints.html">第 1 章 · 机器人上的推理：和云上有什么不同</a>。数字来自 π0 论文：动作块 50 步、50 Hz 控制、每执行 25 步推理一次、RTX 4090 上板上推理 73 ms、走 Wi‑Fi 板外 86 ms。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="L">自己拖：一次推理要多少 ms</label><input type="range" id="L" min="20" max="700" step="10" value="73"><span id="Lv">73</span></div>
+<p class="note">看点：① 控制器每 20 ms 发一个动作（绿点）；② 一次推理给 50 步动作，够走 1 秒；③ 每执行 25 步（500 ms）推理一次；④ 推理 73 ms 只占这 500 ms 的 14.6%；⑤ 放到板外再加 13 ms 网络。滑块：推理变慢，占比上升；超过 500 ms，下一块动作来不及，机器人就要停下等。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const X0=60,W=580,T=1000;const xs=t=>X0+t/T*W;
+const ST=[{cap:'控制器每 20 ms 发一个动作：50 Hz',s:0},{cap:'一次推理给 50 步动作，够控制器走 1 秒',s:1},
+ {cap:'每执行 25 步（500 ms）就推理下一块',s:2},{cap:'推理 73 ms 只占这 500 ms 的 14.6%',s:3},{cap:'放到板外走 Wi-Fi：再加 13 ms 网络',s:4}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function axis(){el('line',{x1:X0,y1:300,x2:X0+W,y2:300,stroke:'var(--muted)'},sv);
+ for(let t=0;t<=T;t+=100){el('line',{x1:xs(t),y1:296,x2:xs(t),y2:304,stroke:'var(--muted)'},sv);txt(t+'',{x:xs(t),y:320,'text-anchor':'middle',class:'m'},sv)}
+ txt('时间（ms）',{x:X0+W/2,y:342,'text-anchor':'middle',class:'m'},sv)}
+function ticks(){txt('控制 50 Hz',{x:X0-6,y:94,'text-anchor':'end',class:'m'},sv);
+ for(let t=0;t<T;t+=20)el('circle',{cx:xs(t)+2,cy:90,r:3,fill:'var(--good)'},sv)}
+function chunk(t0,y,lab){el('rect',{x:xs(t0),y,width:W*1000/T*0.999,height:22,rx:4,fill:'var(--accent-bg)',stroke:'var(--accent)'},sv);
+ txt(lab,{x:xs(t0)+8,y:y+16,class:'m'},sv)}
+function infer(t0,L,y,net){el('rect',{x:xs(t0),y,width:Math.max(2,L/T*W),height:22,rx:4,fill:L>500?'var(--bad)':'var(--warm)',opacity:.85},sv);
+ if(net)el('rect',{x:xs(t0+L),y,width:net/T*W,height:22,rx:4,fill:'var(--purple)',opacity:.85},sv)}
+function draw(){clear(sv);axis();ticks();
+ if(custom!==null){const L=custom;txt(`推理 ${L} ms，占 500 ms 的 ${(L/500*100).toFixed(1)}%`+(L>500?'：下一块来不及，机器人要停下等':''),{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);
+  txt('推理',{x:X0-6,y:176,'text-anchor':'end',class:'m'},sv);infer(0,Math.min(L,T),160);infer(500,Math.min(L,500),200);
+  el('line',{x1:xs(500),y1:120,x2:xs(500),y2:240,stroke:'var(--muted)','stroke-dasharray':'4 3'},sv);txt('执行到第 25 步',{x:xs(500)+4,y:132,class:'m'},sv);return}
+ const f=ST[FR[k]];txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);
+ if(f.s>=1)chunk(0,120,'动作块：50 步 × 20 ms = 1000 ms');
+ if(f.s>=2){el('line',{x1:xs(500),y1:112,x2:xs(500),y2:250,stroke:'var(--muted)','stroke-dasharray':'4 3'},sv);txt('执行到第 25 步 → 推理下一块',{x:xs(500)+4,y:262,class:'m'},sv);
+  txt('推理',{x:X0-6,y:176,'text-anchor':'end',class:'m'},sv);infer(0,73,160,f.s>=4?13:0);infer(500,73,160,f.s>=4?13:0)}
+ if(f.s>=3){txt('73 ÷ 500 = 14.6%',{x:xs(500)+90,y:176,class:'big'},sv)}
+ if(f.s>=4){txt('紫色：网络 13 ms → 板外 86 ms',{x:xs(500)+90,y:200,class:'m'},sv)}
+}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('L').oninput=e=>{ANIM.stop();custom=+e.target.value;$('Lv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1500);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

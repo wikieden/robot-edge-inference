@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 8 章 · 综合案例：把一个 π0 级 VLA 装上机器人 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html" class="cur"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="8-0-vla">第 8 章 · 综合案例：把一个 π0 级 VLA 装上机器人</h1><div class="run"><a class="btn" href="../animations/08-case-study.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch08_case_study.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch08_case_study.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch08_case_study.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：把前七章串起来，给一个 3.3B 的 VLA 挑板子、算预算、定优化顺序，最后上车前要检查什么？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/07-power-and-cloud.html">第 7 章 功耗与端云分工</a><br />
+对应原文：<code>vla-deep-dive/materials/text/papers/pi0-2410.24164.txt</code> L255（H = 50）、L302–L306（3.3B = 3B VLM + 300M 动作专家）、L938–L940（每执行 25 步推理一次）、Table I L942–L951（10 步 flow）；模组参数见 <a href="../lessons/appendix-sources.html">附录 · 材料来源</a>；GR00T 2 Thor 实测见 <a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a>；<code>smolvla-2506.01844.txt</code>（0.45B 小模型）<br />
+本章缩写：flow = flow matching（流匹配，π0 用来生成动作的方法，讲义见 <a href="https://wikieden.github.io/vla-from-scratch/lessons/08-pi0.html">vla-deep-dive 第 8 章</a>）· 动作专家 = π0 里专门出动作的 300M 小网络 · OTA = Over-The-Air（空中升级）· watchdog = 看门狗（超时没收到心跳就触发保护）· tegrastats = Jetson 上看内存、功率、温度的命令 · jetson_clocks = 把 Jetson 频率锁到当前档位上限的命令。全部缩写见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：题目和容量（2026-11-26）</h3>
+<p><strong>题目</strong>：一台双臂机器人，控制 50 Hz，用一个 π0 级的 VLA：3.3B 参数（3B 视觉语言部分 + 300M 动作专家，L302–L306），动作块 <span class="arithmatex">\(H = 50\)</span>，每执行 25 步推理一次（L938–L940）。候选三块板子：Orin NX 16GB（Super）、AGX Orin 64GB、Jetson T5000（Thor）。</p>
+<p><strong>时间预算</strong>（第 1 章第二步）：每执行 25 步推理一次，<span class="arithmatex">\(25 \times 20 = 500\)</span> ms 内必须回来。用异步执行时（第 6 章第二步），这就是 <span class="arithmatex">\(g = 0.5\)</span> 的情况。</p>
+<p><strong>容量</strong>（第 3 章第四步）：bf16 权重 <span class="arithmatex">\(3.3 \times 2 = 6.6\)</span> GB，系统预留 3 GB（编的）。三块板子留给模型的空间分别约 13、61、125 GB，<strong>都放得下</strong>。</p>
+<p><strong>一句话</strong>：先把预算（500 ms）和容量（6.6 GB）定下来，三块板子都过了容量这一关。</p>
+<h3 id="2026-11-26_1">第二步：两段下限（2026-11-26）</h3>
+<p>π0 一次推理分两段，卡住它们的东西不一样（第 3 章第三步）：</p>
+<ol>
+<li><strong>前缀</strong>（3 张图 + 文字，816 个 token，48 个文字 token 是编的）：算力受限。运算量 <span class="arithmatex">\(2 \times 3 \times 10^9 \times 816 = 4.9 \times 10^{12}\)</span>，除以"稠密算力 × 利用率 40%"；</li>
+<li><strong>动作专家</strong>（10 步 flow）：每步都把 300M 参数（bf16 0.6 GB）读一遍，带宽受限：<span class="arithmatex">\(10 \times 0.6\ \text{GB} \div \text{带宽}\)</span>。</li>
+</ol>
+<p><strong>假设</strong>（都要在真机上校准）：利用率 40%；AGX Orin 和 NX 用稠密 INT8 算力（138、78）；Thor 用 FP8 稠密，按官方 FP4 稀疏 2070 的 1/4 估成 517.5（稀疏 → 稠密 ÷ 2，FP4 → FP8 再 ÷ 2）。</p>
+<table>
+<thead>
+<tr>
+<th>板子</th>
+<th>前缀下限</th>
+<th>动作专家下限</th>
+<th>合计</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin NX 16GB（Super）</td>
+<td>156.9 ms</td>
+<td>58.6 ms</td>
+<td>215.5 ms</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>88.7 ms</td>
+<td>29.3 ms</td>
+<td>118.0 ms</td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>23.7 ms</td>
+<td>22.0 ms</td>
+<td>45.6 ms</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="π0 级 VLA 在三块板子上的推理下限 vs 500 ms 预算" src="../figures/08-case-study-devices.png" /></p>
+<p><strong>一句话</strong>：前缀按算力算、动作专家按带宽算，加起来是下限；三块板子的下限都在 500 ms 以内。</p>
+<h3 id="2026-11-26_2">第三步：余量够不够（2026-11-26）</h3>
+<p><strong>下限不是实测</strong>。实际会慢多少？参考 GR00T 2 在 Thor 上的经验：没优化的 eager PyTorch 是 720 ms，全部优化后 124 ms，差了 5.8 倍（第 5 章第三步）。</p>
+<table>
+<thead>
+<tr>
+<th>板子</th>
+<th>预算 ÷ 下限</th>
+<th>粗估"没优化"（下限 × 5.8）</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin NX 16GB（Super）</td>
+<td>2.3 倍</td>
+<td>约 1250 ms</td>
+<td><strong>必须优化</strong>，而且优化后仍很紧</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>4.2 倍</td>
+<td>约 684 ms</td>
+<td>超预算，<strong>做完量化和 TensorRT 才行</strong></td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>11.0 倍</td>
+<td>约 265 ms</td>
+<td>不优化也在预算内，余量大</td>
+</tr>
+</tbody>
+</table>
+<p>"下限 × 5.8"只是粗估，不同模型、不同代码差很多，最终要实测。但它说明了一件事：<strong>余量不到 5 倍的板子，第 4、5 章的优化不是可选项</strong>。</p>
+<p><strong>怎么选</strong>：
+- 预算充足、要跑更大的模型或更多路相机 → Thor；
+- 成本和功耗敏感 → AGX Orin，按第四步的顺序做优化；
+- Orin NX 跑这个模型很勉强，可以考虑换小模型：SmolVLA 只有 0.45B（论文 L578），配合异步推理，设计目标就是消费级 GPU 甚至 CPU。</p>
+<p><strong>一句话</strong>：预算 ÷ 下限就是余量；余量小于 5 倍，先做量化和 TensorRT 再上车。</p>
+<h3 id="2026-11-26_3">第四步：优化顺序和上车检查清单（2026-11-26）</h3>
+<p><strong>优化顺序</strong>（照 GR00T 2 的做法，每一步都测一次、都过验收）：</p>
+<table>
+<thead>
+<tr>
+<th>顺序</th>
+<th>做什么</th>
+<th>哪一章</th>
+<th>要验收吗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>去掉重复计算（文本特征只算一次、预计算时间步）</td>
+<td>第 5 章</td>
+<td>输出应完全不变</td>
+</tr>
+<tr>
+<td>2</td>
+<td>TensorRT 编译视觉编码器和主干</td>
+<td>第 5 章</td>
+<td>数值比对</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CUDA Graph 录下固定形状的部分</td>
+<td>第 5 章</td>
+<td>输出应完全不变</td>
+</tr>
+<tr>
+<td>4</td>
+<td>FP8 / INT8 / int4 量化</td>
+<td>第 4 章</td>
+<td>数值 → 仿真 → 真机</td>
+</tr>
+<tr>
+<td>5</td>
+<td>减少 flow 步数</td>
+<td>—</td>
+<td>数值 → 仿真 → 真机</td>
+</tr>
+<tr>
+<td>6</td>
+<td>异步执行 + RTC 平滑衔接</td>
+<td>第 6 章</td>
+<td>真机看平滑度</td>
+</tr>
+</tbody>
+</table>
+<p><strong>上车前检查清单</strong>：</p>
+<ul>
+<li>[ ] <strong>锁版本</strong>：JetPack、TensorRT、模型权重、引擎文件一起打版本号；引擎在目标板上构建（第 5 章第二步）。</li>
+<li>[ ] <strong>测在真实条件下</strong>：实际功率档位、热稳定后、全部相机都开着，跑几百次看 p99（第 6 章第四步、第 7 章第二步）。</li>
+<li>[ ] <strong>内存留余量</strong>：用 <code>tegrastats</code> 看峰值内存，不要贴着上限跑。</li>
+<li>[ ] <strong>超时兜底</strong>：推理进程挂了或超时，控制器用 watchdog 检测，停稳或保持当前姿态（<a href="https://wikieden.github.io/robot-architecture/lessons/10-safety-and-cases.html">机器人软硬件架构第 10 章</a>）。</li>
+<li>[ ] <strong>断网能活</strong>：所有必须在机器人上的部分不依赖网络（第 7 章第四步）。</li>
+<li>[ ] <strong>能回滚</strong>：OTA 升级失败时能回到上一个能用的版本。</li>
+</ul>
+<p><strong>测的时候常用的几条命令</strong>（Jetson 上的真实命令）：</p>
+<pre><code class="language-bash">sudo nvpmodel -q          # 看当前功率模式
+sudo jetson_clocks        # 把频率锁到当前档位上限，测出来的数更稳定
+tegrastats --interval 500 # 每 0.5 s 打印内存、CPU / GPU 占用、功率和温度
+</code></pre>
+<p><strong>一句话</strong>：按"不改输出的先做、改输出的后做"的顺序优化，每步验收；上车前在真实条件下测 p99，准备好超时、断网、回滚三条退路。</p>
+<h3 id="_2">动画演示：三块板子的下限和余量</h3>
+<p><img alt="π0 级 VLA 上车预算" src="../animations/08-case-study.gif" /></p>
+<p>可交互版：<a href="../animations/08-case-study.html">animations/08-case-study.html</a>（滑块：实际利用率）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>蓝色是前缀（算力受限），三块板子差别最大（第二步）；</li>
+<li>橙色是 10 步动作专家（带宽受限）（第二步）；</li>
+<li>红虚线是 500 ms 预算，三块下限都在线内（第三步）；</li>
+<li>乘上 5.8 倍粗估"没优化"：两块 Orin 都超了，只剩 Thor（第三步）；</li>
+<li>拖滑块：利用率从 40% 降到 20%，看哪块板子先超预算。</li>
+</ol>
+<h2 id="_3">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步）：如果把动作专家量化成 int4（每个参数 0.5 字节），AGX Orin 上 10 步动作专家的带宽下限变成多少 ms？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：机器人改成 30 Hz 控制、每执行 15 步推理一次。预算变成多少 ms？AGX Orin 的余量（预算 ÷ 118.0 ms）是多少倍？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第四步）：为什么"去掉重复计算""CUDA Graph"放在量化之前做？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_4">口诀</h2>
+<blockquote>
+<p>先定预算再定容量，三块板子都放下；<br />
+前缀按算力，动作按带宽，加起来是下限；<br />
+预算除下限看余量，不到五倍先优化；<br />
+不改输出的先做，超时断网要回滚。</p>
+</blockquote>
+<h2 id="_5">本章复习卡片</h2>
+<p><a href="../review.html">E15</a>（两段下限怎么算）、<a href="../review.html">E16</a>（优化顺序为什么这样排）</p>
+<h2 id="_6">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_7">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ GR00T 2 部署章</td>
+<td><a href="https://wikieden.github.io/reading-gr00t2/lessons/10-deployment.html">gr00t2 第 10 章</a></td>
+<td>一个真实 VLA / WAM 在 Thor 上的完整部署记录</td>
+</tr>
+<tr>
+<td>★ VLA 讲义 · π0</td>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/08-pi0.html">vla-deep-dive 第 8 章</a></td>
+<td>π0 的结构：VLM 前缀 + 动作专家 + flow</td>
+</tr>
+<tr>
+<td>SmolVLA 论文</td>
+<td><code>vla-deep-dive/materials/text/papers/smolvla-2506.01844.txt</code> L106–L119、L578</td>
+<td>0.45B 小模型怎么为端侧设计</td>
+</tr>
+<tr>
+<td>高效 VLA 综述</td>
+<td><code>vla-deep-dive/materials/text/papers/survey-efficient-vla-2510.24795.txt</code></td>
+<td>端侧 VLA 的方法地图</td>
+</tr>
+<tr>
+<td>VLA 面试资料 · 模型选型与真机迁移</td>
+<td>vla-deep-dive 面试资料</td>
+<td>选型时还要看的非性能因素（许可、生态）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">数学原理</h3>
+<ul>
+<li><strong>两段下限相加</strong>：前缀和动作专家是先后执行的，下限直接相加；如果两段能并行（比如前缀和上一块的动作专家重叠），就要按关键路径算。</li>
+<li><strong>余量</strong>：预算 ÷ 下限。它告诉你"实际可以比下限慢几倍还来得及"。</li>
+</ul>
+<h3 id="_9">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前缀下限 <span class="arithmatex">\(= 2NT \div (\text{稠密算力} \times u)\)</span></td>
+<td><span class="arithmatex">\(u\)</span> 是利用率</td>
+</tr>
+<tr>
+<td>动作下限 <span class="arithmatex">\(= \text{步数} \times \text{专家字节} \div \text{带宽}\)</span></td>
+<td>10 步 × 0.6 GB</td>
+</tr>
+<tr>
+<td>余量 <span class="arithmatex">\(=\)</span> 预算 <span class="arithmatex">\(\div\)</span> 下限</td>
+<td>不到 5 倍先优化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch08_case_study.py</code>，配套测试 <code>tests/test_chapters.py::test_ch08</code>，notebook 在 <code>notebooks/ch08_case_study.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch08_case_study.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch08</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（π0 的结构来自论文；利用率 40%、816 个 token、Thor FP8 稠密按 FP4 稀疏的 1/4、预留 3 GB 是假设）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一步 容量</td>
+<td><span class="arithmatex">\(6.6 \le\)</span> 总 <span class="arithmatex">\(- 3\)</span></td>
+<td><code>plan(name)["fits"]</code></td>
+<td>三块都放得下</td>
+</tr>
+<tr>
+<td>第二步 AGX Orin 前缀</td>
+<td><span class="arithmatex">\(4.9\text{e}12 \div (138\text{e}12 \times 0.4)\)</span></td>
+<td><code>prefix_ms(138)</code></td>
+<td>88.7 ms</td>
+</tr>
+<tr>
+<td>第二步 AGX Orin 动作专家</td>
+<td><span class="arithmatex">\(10 \times 0.6 \div 204.8\)</span></td>
+<td><code>action_ms(204.8)</code></td>
+<td>29.3 ms</td>
+</tr>
+<tr>
+<td>第二步 Thor 合计</td>
+<td>两段相加</td>
+<td><code>plan("Jetson T5000（Thor）")["total"]</code></td>
+<td>45.6 ms</td>
+</tr>
+<tr>
+<td>第三步 余量</td>
+<td><span class="arithmatex">\(500 \div\)</span> 下限</td>
+<td><code>plan(name)["margin"]</code></td>
+<td>2.3 / 4.2 / 11.0 倍</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def prefix_ms(dense_tops, params=3e9, tokens=816, util=0.4):
+    return 2 * params * tokens / (dense_tops * 1e12 * util) * 1000   # 前缀：算力受限
+
+def action_ms(bw_gbps, expert_gb=0.6, steps=10):
+    return steps * expert_gb / bw_gbps * 1000                        # 动作专家：带宽受限
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li>前缀里没算 3 路图像编码器（SigLIP）单独的读写，也没算动作专家对前缀 KV 的读取；都是偏乐观的地方，真机上会更慢。</li>
+<li>Thor 的 FP8 稠密算力是按"FP4 稀疏 ÷ 4"推的，官方产品页没直接给这个数；换算方式写在 <code>DEVICES</code> 的注释里，查到数据表后要替换。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>util</code> 改成 0.2，看哪块板子的余量先跌破 2 倍。</li>
+<li>把 <code>tokens</code> 改成 2 路相机（560 个），看前缀能省多少。</li>
+</ul><nav class="pager"><a href="07-power-and-cloud.html">← 第 7 章 · 功耗、散热和端云分工</a><span></span></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

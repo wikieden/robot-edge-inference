@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 3 章 · 先算下限：读权重要多久、算一遍要多久、放不放得下 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<button type="button" id="nav-toggle" aria-label="打开章节列表">☰ 章节</button><a class="brand" href="../index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="../lessons/index.html">讲义目录</a>
+<a href="../animations/index.html">动画</a>
+<a href="../review.html">复习卡片</a>
+<a href="../lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<div class="layout"><nav class="side" aria-label="章节"><div class="h">AI Infra 扩展 · 机器人端侧推理</div><a href="index.html">讲义目录</a><a href="01-robot-constraints.html"><span class="n">1</span>机器人上的推理：和云上有什么不同</a><a href="02-edge-chips.html"><span class="n">2</span>端侧芯片：看懂 Jetson 的三个数</a><a href="03-lower-bounds.html" class="cur"><span class="n">3</span>先算下限：读权重要多久、算一遍要多久、放不放得下</a><a href="04-quantization.html"><span class="n">4</span>量化：省内存、省带宽，但不一定变快</a><a href="05-inference-engines.html"><span class="n">5</span>推理引擎：从 PyTorch 到 TensorRT，再到 CUDA Graph</a><a href="06-realtime-scheduling.html"><span class="n">6</span>实时调度：动作块、异步推理、快慢两套系统</a><a href="07-power-and-cloud.html"><span class="n">7</span>功耗、散热和端云分工</a><a href="08-case-study.html"><span class="n">8</span>综合案例：把一个 π0 级 VLA 装上机器人</a><a href="appendix-glossary.html">附录 · 缩写与术语表</a><a href="appendix-sources.html">附录 · 材料来源</a></nav><main>
+<h1 id="3">第 3 章 · 先算下限：读权重要多久、算一遍要多久、放不放得下</h1><div class="run"><a class="btn" href="../animations/03-lower-bounds.html">▶ 打开本章可交互动画</a><a class="btn" href="https://colab.research.google.com/github/wikieden/robot-edge-inference/blob/main/code/notebooks/ch03_lower_bounds.ipynb" target="_blank" rel="noopener">在 Colab 运行本章代码</a><a class="btn" href="../code/notebooks/ch03_lower_bounds.ipynb" download>下载 notebook</a><details><summary>本地运行</summary><pre><code>git clone https://github.com/wikieden/robot-edge-inference
+cd robot-edge-inference/code/notebooks
+pip install jupyterlab torch numpy
+jupyter lab ch03_lower_bounds.ipynb</code></pre><p>也可以下载后直接用 VS Code 打开 .ipynb 运行。需要 GPU 的章节在 Colab 里选「代码执行程序 → 更改运行时类型 → GPU」。</p></details></div>
+<blockquote>
+<p>本章回答：一个 VLA 放到某块板子上，最快能跑到多少 Hz？还没买板子、没跑代码之前，能不能先用几个数估出来？<br />
+编写日期：2026-11-26 · 上一章：<a href="../lessons/02-edge-chips.html">第 2 章 端侧芯片</a> · 下一章：<a href="../lessons/04-quantization.html">第 4 章 量化</a><br />
+对应原文：<code>vla-deep-dive/materials/text/papers/openvla-2406.09246.txt</code> L200、L248–L250（7 维动作、每维 256 个 bin）、L336–L338（bf16 占 15 GB、RTX 4090 约 6 Hz）、Table 2 L607–L609（int4 7.0 GB）；<code>pi0-2410.24164.txt</code> L302–L306（3.3B）、Table I L942–L951；<code>paligemma-2407.07726.txt</code> L231–L233（224 px → 256 个图像 token）；RTX 4090 带宽 1,008 GB/s 见《深入理解 AI Infra》§4.3 L469<br />
+本章缩写：bf16 = Brain Floating Point 16（谷歌大脑提出的 16 位浮点，每个数 2 字节）· int4 = 4-bit integer（4 位整数）· GB/s = gigabytes per second（每秒吉字节）· token = 模型处理的基本单位（文字片段、图像小块或离散化的动作）· prefill = 预填充（把输入一次算完）· decode = 解码（一个一个往外吐 token）· 其余见<a href="../lessons/appendix-glossary.html">附录 · 缩写与术语表</a></p>
+</blockquote>
+<h2 id="_1">讲解</h2>
+<h3 id="2026-11-26">第一步：两个下限：搬砖和砌墙（2026-11-26）</h3>
+<p><strong>类比：盖墙。</strong> 砖堆在院子里，工人要先把砖搬到墙边（读数据），再一块块砌上去（计算）。墙最快多久盖好，取决于两件事里更慢的那件：搬砖的小车每秒能运多少，砌墙的工人每秒能砌多少。</p>
+<p>对应到模型，有两个下限：</p>
+<div class="arithmatex">\[
+t_{\text{读}} = \frac{\text{要读的字节数}}{\text{内存带宽}}, \qquad
+t_{\text{算}} = \frac{\text{运算量}}{\text{算力}}
+\]</div>
+<ul>
+<li><span class="arithmatex">\(t_{\text{读}}\)</span>：读作"t 读"，把这次要用的数据从内存读出来至少要多久。</li>
+<li><span class="arithmatex">\(t_{\text{算}}\)</span>：把这次要做的乘加做完至少要多久。</li>
+<li>实际时间<strong>不会比两者中较大的那个更快</strong>，通常还要慢好几倍（第 5 章讲为什么）。</li>
+</ul>
+<p>这就是《深入理解 AI Infra》第 1 章和 §4.8 用的方法（AII §1.3），机器人上一样适用。</p>
+<p><strong>一句话</strong>：最快多快，看搬数据和做计算哪个更慢。</p>
+<h3 id="openvla-7-2026-11-26">第二步：OpenVLA：一步要把权重读 7 遍（2026-11-26）</h3>
+<p>OpenVLA 是 7B 参数的 VLA。它输出 7 维动作（比如末端 3 个位置、3 个姿态、1 个夹爪），每一维离散成 256 个格子（bin），当成 1 个 token 输出（L200、L248–L250）。所以<strong>每一步动作要逐个吐出 7 个 token</strong>。</p>
+<p>batch = 1 时，每吐一个 token 都要把全部权重从内存读一遍（第 1 章第三步）。bf16 推理占 15 GB（L336）。</p>
+<div class="arithmatex">\[
+t_{\text{一步}} \ge 7 \times \frac{15\ \text{GB}}{\text{带宽}}
+\]</div>
+<p><strong>算一遍，再和论文实测对照</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>带宽</th>
+<th>一步下限</th>
+<th>最多多少 Hz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RTX 4090</td>
+<td>1008 GB/s</td>
+<td><span class="arithmatex">\(7 \times 15 \div 1008 = 104.2\)</span> ms</td>
+<td>9.6 Hz</td>
+</tr>
+<tr>
+<td>Jetson T5000（Thor）</td>
+<td>273 GB/s</td>
+<td>384.6 ms</td>
+<td>2.60 Hz</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>204.8 GB/s</td>
+<td>512.7 ms</td>
+<td>1.95 Hz</td>
+</tr>
+</tbody>
+</table>
+<p>论文实测 RTX 4090 上<strong>约 6 Hz</strong>（L337–L338），比 9.6 Hz 的上限慢，但在同一个量级。这说明下限算得没错，实际还有别的开销（图像编码、kernel 启动等）。</p>
+<p>同一个模型搬到 AGX Orin 上，上限只剩 1.95 Hz。换成 int4（占 7.0 GB，L609）：AGX Orin <span class="arithmatex">\(7 \times 7.0 \div 204.8 = 239.3\)</span> ms → 最多 4.18 Hz；Thor 179.5 ms → 5.57 Hz。</p>
+<p><img alt="OpenVLA 每秒最多能出几步动作" src="../figures/03-lower-bounds-openvla-hz.png" /></p>
+<blockquote>
+<p>注意：15 GB 是论文报告的推理显存，比 <span class="arithmatex">\(7\text{B} \times 2\)</span> 字节 <span class="arithmatex">\(= 14\)</span> GB 多一点，多出来的是视觉编码器、激活和缓冲。这里用 15 GB 是偏保守的估计。</p>
+</blockquote>
+<p><strong>一句话</strong>：自回归一步吐 7 个 token，每个都读一遍权重；带宽 ÷ (7 × 权重字节) 就是最高频率。</p>
+<h3 id="0-2026-11-26">第三步：π0 的前缀：这次卡住的是算力（2026-11-26）</h3>
+<p>不是所有部分都被带宽卡住。π0 每次推理先把<strong>前缀</strong>（3 张图 + 一段文字指令）一次算完，这叫 prefill。前缀里 token 很多，同一份权重被很多 token 共用，读一遍权重就能做很多计算，这时卡住的是<strong>算力</strong>。</p>
+<p><strong>运算量</strong>：每个 token 过一遍有 <span class="arithmatex">\(N\)</span> 个参数的模型，大约做 <span class="arithmatex">\(2N\)</span> 次运算（每个参数一次乘、一次加）。<span class="arithmatex">\(T\)</span> 个 token 就是：</p>
+<div class="arithmatex">\[
+\text{运算量} \approx 2 \times N \times T
+\]</div>
+<ul>
+<li><span class="arithmatex">\(N\)</span>：参数量。π0 的视觉语言部分是 3B（L302–L304），即 <span class="arithmatex">\(3 \times 10^9\)</span>。</li>
+<li><span class="arithmatex">\(T\)</span>：前缀 token 数。PaliGemma 一张 224 px 的图是 256 个 token（PaliGemma 论文 L231–L233），3 张图 768 个；再加 48 个文字 token（<strong>48 是编的</strong>），共 816 个。</li>
+</ul>
+<p><strong>算一遍</strong>：<span class="arithmatex">\(2 \times 3 \times 10^9 \times 816 = 4.90 \times 10^{12}\)</span>，约 4.9 万亿次运算。</p>
+<p><strong>和实测对照</strong>：4090 上前缀用了 <span class="arithmatex">\(14 + 32 = 46\)</span> ms（Table I），反推有效算力 <span class="arithmatex">\(4.9 \times 10^{12} \div 0.046 \approx 106\)</span> 万亿次 / 秒。而读一遍 6 GB 权重只要 <span class="arithmatex">\(6 \div 1008 = 6.0\)</span> ms，远小于 46 ms，所以<strong>前缀被算力卡住，不是带宽</strong>。</p>
+<p><strong>搬到 AGX Orin</strong>：稠密 138 INT8 TOPS × 利用率 40%（编的）= 55，前缀约 <span class="arithmatex">\(4.9 \times 10^{12} \div (55 \times 10^{12}) \approx 89\)</span> ms。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>特点</th>
+<th>卡在哪</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前缀（prefill）</td>
+<td>几百个 token 一起算，权重被反复用</td>
+<td><strong>算力</strong></td>
+</tr>
+<tr>
+<td>逐个吐 token（decode）、flow 动作步</td>
+<td>每步 token 很少，读一遍权重只做一点计算</td>
+<td><strong>带宽</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>一句话</strong>：前缀 token 多、算力卡；逐步生成 token 少、带宽卡；一个模型里两种都有，要分开算。</p>
+<h3 id="2026-11-26_1">第四步：放不放得下（2026-11-26）</h3>
+<p>速度之前先看容量：模型连同缓冲要能放进统一内存扣掉预留后的部分（第 2 章第一步）。</p>
+<div class="arithmatex">\[
+\text{模型占用} \le \text{总内存} - \text{系统预留}
+\]</div>
+<p><strong>例子</strong>（系统预留 3 GB 是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>留给模型</th>
+<th>OpenVLA bf16（15 GB）</th>
+<th>OpenVLA int4（7.0 GB）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orin Nano 8GB</td>
+<td>5 GB</td>
+<td>放不下</td>
+<td>放不下</td>
+</tr>
+<tr>
+<td>Orin NX 16GB</td>
+<td>13 GB</td>
+<td>放不下</td>
+<td>放得下</td>
+</tr>
+<tr>
+<td>AGX Orin 64GB</td>
+<td>61 GB</td>
+<td>放得下</td>
+<td>放得下</td>
+</tr>
+</tbody>
+</table>
+<p>Orin Nano 连 int4 的 OpenVLA 都放不下，要么换更小的模型（比如 0.45B 的 SmolVLA，第 8 章附录），要么换板子。</p>
+<p><strong>一句话</strong>：先算放不放得下，再算多快；放不下的话，算得再快也没用。</p>
+<h3 id="7">动画演示：一步读 7 遍权重</h3>
+<p><img alt="读权重的带宽下限" src="../animations/03-lower-bounds.gif" /></p>
+<p>可交互版：<a href="../animations/03-lower-bounds.html">animations/03-lower-bounds.html</a>（滑块：内存带宽）</p>
+<p><strong>怎么看</strong>：</p>
+<ol>
+<li>7 个格子依次亮起，每亮一个代表把 15 GB 权重读一遍（第二步）；</li>
+<li>4090 上下限 104 ms、9.6 Hz，红虚线是实测约 6 Hz（第二步）；</li>
+<li>换到 AGX Orin 只剩 1.95 Hz，int4 是 4.18 Hz（第二步）；</li>
+<li>拖滑块改带宽，看 bf16 和 int4 的上限一起变。</li>
+</ol>
+<h2 id="_2">练习与作答记录</h2>
+<p><strong>题 1</strong>（第二步）：OpenVLA int4（7.0 GB）放到 Orin NX 16GB（102.4 GB/s）上，一步的带宽下限是多少 ms？最多多少 Hz？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 2</strong>（第三步）：如果 π0 只用 2 路相机（2 × 256 个图像 token + 48 个文字 token），前缀运算量是多少？在 AGX Orin 上按 55 万亿次 / 秒算，大约多少 ms？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<p><strong>题 3</strong>（第三、四步）：一个模型在某块板子上"放得下"，但 prefill 下限已经超过时限了。只换一块带宽更大、算力不变的板子，能解决吗？为什么？</p>
+<blockquote>
+<p>作答：（待作答）</p>
+</blockquote>
+<h2 id="_3">口诀</h2>
+<blockquote>
+<p>搬砖砌墙看更慢，读算两限取其大；<br />
+一步七个 token，权重读七遍；<br />
+前缀 token 多算力卡，逐个生成带宽卡；<br />
+先问放不放得下，再问跑得有多快。</p>
+</blockquote>
+<h2 id="_4">本章复习卡片</h2>
+<p><a href="../review.html">E05</a>（两个下限公式）、<a href="../review.html">E06</a>（prefill 和 decode 各卡在哪）</p>
+<h2 id="_5">附录 · 延伸阅读</h2>
+<blockquote>
+<p>留给以后深入学习用，不影响本章主线。★ 是建议先读的。</p>
+</blockquote>
+<h3 id="_6">推荐阅读</h3>
+<table>
+<thead>
+<tr>
+<th>读什么</th>
+<th>读哪里</th>
+<th>读它为了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★ 《深入理解 AI Infra》第 1 章</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/01-初识 AI Infra.md</code> §1.3 L233–L365</td>
+<td>单 token 的读与算各要多久、实测为什么达不到</td>
+</tr>
+<tr>
+<td>★ 《深入理解 AI Infra》§12.1.5</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/12-端边云协同.md</code> L154 起</td>
+<td>同样方法用在手机上：84.8 GB/s → Qwen3-8B 约 5 token/s</td>
+</tr>
+<tr>
+<td>OpenVLA 论文</td>
+<td><code>vla-deep-dive/materials/text/papers/openvla-2406.09246.txt</code> L336–L338、Fig. 6 L612–L620</td>
+<td>各种 GPU 上的实测频率</td>
+</tr>
+<tr>
+<td>VLA 讲义 · 动作 token</td>
+<td><a href="https://wikieden.github.io/vla-from-scratch/lessons/06-action-tokens.html">vla-deep-dive 第 6 章</a></td>
+<td>动作为什么能离散成 token</td>
+</tr>
+<tr>
+<td>《深入理解 AI Infra》§4.8</td>
+<td><code>ai-infra/materials/ai-infra-book/manuscripts/04-加速器架构.md</code> L960 起</td>
+<td>用同一个模型比较 11 款候选设备</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">数学原理</h3>
+<ul>
+<li><strong>矩阵乘的运算量</strong>：一个 <span class="arithmatex">\(N\)</span> 参数的层处理 1 个 token，每个参数做一次乘法和一次加法，约 <span class="arithmatex">\(2N\)</span> 次运算；<span class="arithmatex">\(T\)</span> 个 token 就是 <span class="arithmatex">\(2NT\)</span>。</li>
+<li><strong>算术强度</strong>：运算量 ÷ 读的字节数。前缀 token 多，强度高，算力先满；逐个生成 token 少，强度低，带宽先满。这是 roofline 模型（AISPE §6.13）的核心。</li>
+</ul>
+<h3 id="_8">公式清单</h3>
+<table>
+<thead>
+<tr>
+<th>公式</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(t_{\text{读}}\)</span> = 字节 <span class="arithmatex">\(\div\)</span> 带宽</td>
+<td>带宽下限</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(t_{\text{算}}\)</span> = 运算量 <span class="arithmatex">\(\div\)</span> 算力</td>
+<td>算力下限</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(t_{\text{一步}} \ge 7 \times\)</span> 权重字节 <span class="arithmatex">\(\div\)</span> 带宽</td>
+<td>OpenVLA 一步的带宽下限</td>
+</tr>
+<tr>
+<td>运算量 <span class="arithmatex">\(\approx 2NT\)</span></td>
+<td><span class="arithmatex">\(N\)</span> 个参数、<span class="arithmatex">\(T\)</span> 个 token 的前向运算量</td>
+</tr>
+<tr>
+<td>模型占用 <span class="arithmatex">\(\le\)</span> 总内存 <span class="arithmatex">\(-\)</span> 预留</td>
+<td>放不放得下</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">代码对照：把本章的数字用代码算一遍</h3>
+<blockquote>
+<p>纯 Python，不需要安装任何库。代码在仓库本地 <code>ai-infra-edge/solutions/chapter-code/ch03_lower_bounds.py</code>，配套测试 <code>tests/test_chapters.py::test_ch03</code>，notebook 在 <code>notebooks/ch03_lower_bounds.ipynb</code>。Mac 上直接能跑，不需要 GPU：</p>
+<p><code>bash  
+cd ai-infra-edge/solutions/chapter-code  
+uv run python ch03_lower_bounds.py   # 一步一步打印  
+uv run pytest tests/test_chapters.py -k ch03</code></p>
+</blockquote>
+<p><strong>讲义 ↔ 代码</strong>（OpenVLA、π0 的数来自论文；48 个文字 token、利用率 40%、预留 3 GB 是编的）：</p>
+<table>
+<thead>
+<tr>
+<th>讲义</th>
+<th>公式</th>
+<th>写法</th>
+<th>跑出来</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第二步 4090 一步下限</td>
+<td><span class="arithmatex">\(7 \times 15 \div 1008\)</span></td>
+<td><code>openvla_step_ms(15, 1008)</code></td>
+<td>104.2 ms → 9.6 Hz</td>
+</tr>
+<tr>
+<td>第二步 AGX Orin bf16</td>
+<td><span class="arithmatex">\(7 \times 15 \div 204.8\)</span></td>
+<td><code>openvla_step_ms(15, 204.8)</code></td>
+<td>512.7 ms → 1.95 Hz</td>
+</tr>
+<tr>
+<td>第二步 AGX Orin int4</td>
+<td><span class="arithmatex">\(7 \times 7.0 \div 204.8\)</span></td>
+<td><code>openvla_step_ms(7.0, 204.8)</code></td>
+<td>239.3 ms → 4.18 Hz</td>
+</tr>
+<tr>
+<td>第三步 前缀运算量</td>
+<td><span class="arithmatex">\(2 \times 3\text{e}9 \times 816\)</span></td>
+<td><code>prefill_flops(3e9, 816)</code></td>
+<td>4.90 万亿次</td>
+</tr>
+<tr>
+<td>第三步 反推 4090 有效算力</td>
+<td>运算量 ÷ 46 ms</td>
+<td><code>flops / 0.046</code></td>
+<td>106 万亿次 / 秒</td>
+</tr>
+<tr>
+<td>第三步 AGX Orin 前缀</td>
+<td>运算量 ÷ 55 万亿</td>
+<td><code>compute_ms(flops, 55.2)</code></td>
+<td>89 ms</td>
+</tr>
+<tr>
+<td>第四步 放不放得下</td>
+<td>占用 ≤ 总 − 3</td>
+<td><code>fits(7.0, 16)</code></td>
+<td>放得下</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键几行</strong>：</p>
+<pre><code class="language-python">def read_ms(gb, bw_gbps):
+    return gb / bw_gbps * 1000                  # 字节 ÷ 带宽，换成毫秒
+
+def openvla_step_ms(model_gb, bw_gbps, n_tokens=7):
+    return n_tokens * read_ms(model_gb, bw_gbps)  # 每吐一个 token 读一遍全部权重
+
+def prefill_flops(params, tokens):
+    return 2 * params * tokens                  # 每个参数一乘一加，每个 token 一遍
+</code></pre>
+<p><strong>代码里才看得到的 2 件事</strong>：</p>
+<ul>
+<li><code>compute_ms</code> 的算力参数单位是"万亿次 / 秒"，函数里乘了 <span class="arithmatex">\(10^{12}\)</span>；传 55 和传 55e12 结果差一万亿倍，单位最容易错。</li>
+<li>带宽用的是 GB/s（<span class="arithmatex">\(10^9\)</span> 字节），模型大小也要用同一个 GB；如果模型大小写的是 GiB（<span class="arithmatex">\(2^{30}\)</span>），要先换算，差约 7%。</li>
+</ul>
+<p><strong>自己改一改</strong>（不影响练习答案）：</p>
+<ul>
+<li>把 <code>BW</code> 里加一行 RTX 5090，查它的带宽填进去，看 OpenVLA 上限变多少。</li>
+<li>把前缀 token 数改成 4 张图，看 AGX Orin 上前缀变成多少 ms。</li>
+</ul><nav class="pager"><a href="02-edge-chips.html">← 第 2 章 · 端侧芯片：看懂 Jetson 的三个数</a><a href="04-quantization.html">第 4 章 · 量化：省内存、省带宽，但不一定变快 →</a></nav>
+</main></div>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>π0 级 VLA 上车预算</title><link rel="stylesheet" href="anim.css">
+<style>svg text.big{font-size:15px}svg text.cap{font-size:15px;font-weight:500}</style></head>
+<body><main>
+<h1>第 08 章 · 把 π0 级 VLA 装上三块板子：下限、余量和 500 ms 预算</h1>
+<p class="sub">配套讲义：<a href="../lessons/08-case-study.html">第 8 章 · 综合案例：把一个 π0 级 VLA 装上机器人</a>。π0：3.3B、动作专家 300M、10 步 flow、每执行 25 步推理一次（50 Hz → 500 ms 预算）。前缀 816 token、利用率 40%、Thor FP8 稠密 = FP4 稀疏 ÷ 4 都是假设。</p>
+<div class="panel"><svg id="sv" viewBox="0 0 680 360"></svg></div>
+<div class="row"><button id="play">▶ 播放</button><button id="step">→ 单步</button><button id="reset">↺ 从头开始</button></div>
+<div class="row"><label for="u">自己拖：实际利用率（%）</label><input type="range" id="u" min="10" max="80" step="5" value="40"><span id="uv">40</span></div>
+<p class="note">看点：① 蓝色是前缀（图像 + 文字，算力受限）；② 橙色是 10 步动作专家（每步读 0.6 GB，带宽受限）；③ 红线是 500 ms 预算；④ 下限乘上 5.8 倍（GR00T 2 在 Thor 上没优化 vs 优化后的差距）当"没优化"的粗估：Orin NX（1250 ms）和 AGX Orin（684 ms）都超预算，只有 Thor（265 ms）还在线内。滑块：利用率越低，前缀越长。</p>
+</main>
+<script src="anim.js"></script>
+<script>
+const sv=$('sv');const D=[['Orin NX 16GB Super',102.4,78],['AGX Orin 64GB',204.8,138],['Jetson T5000（Thor）',273,517.5]];
+const pre=(t,u)=>2*3e9*816/(t*1e12*u)*1000,act=bw=>10*0.6/bw*1000;
+const ST=[{cap:'前缀：图像和文字一次算完，算力受限',a:0,x:1},{cap:'动作专家：10 步，每步读 0.6 GB，带宽受限',a:1,x:1},
+ {cap:'和 500 ms 预算比：三块都在线内',a:1,x:1,b:1},{cap:'没优化的粗估：下限 × 5.8，两块 Orin 都超预算，只剩 Thor',a:1,x:5.8,b:1}];
+const FR=[];ST.forEach((_,i)=>{FR.push(i);FR.push(i)});let k=0,custom=null;
+function bars(u,a,x,b){const x0=200,w=440,sc=w/1300;
+ for(let t=0;t<=1250;t+=250){el('line',{x1:x0+t*sc,y1:70,x2:x0+t*sc,y2:290,stroke:'var(--line)'},sv);txt(t+'',{x:x0+t*sc,y:308,'text-anchor':'middle',class:'m'},sv)}
+ txt('ms',{x:x0+w+20,y:308,class:'m'},sv);
+ D.forEach(([n,bw,tp],i)=>{const y=86+i*70,p=pre(tp,u)*x,q=a?act(bw)*x:0;txt(n,{x:x0-8,y:y+20,'text-anchor':'end',class:'big'},sv);
+  el('rect',{x:x0,y:y+4,width:p*sc,height:26,rx:3,fill:'var(--accent)',opacity:.8},sv);if(a)el('rect',{x:x0+p*sc,y:y+4,width:q*sc,height:26,rx:3,fill:'var(--warm)',opacity:.85},sv);
+  txt((p+q).toFixed(1)+' ms',{x:x0+(p+q)*sc+6,y:y+22,class:'m'},sv)});
+ if(b){el('line',{x1:x0+500*sc,y1:66,x2:x0+500*sc,y2:290,stroke:'var(--bad)','stroke-width':2,'stroke-dasharray':'5 3'},sv);txt('预算 500 ms',{x:x0+500*sc+4,y:64,class:'m'},sv)}}
+function draw(){clear(sv);
+ if(custom!==null){txt(`利用率 ${custom}% 时的下限`,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);bars(custom/100,1,1,1);return}
+ const f=ST[FR[k]];txt(f.cap,{x:340,y:30,'text-anchor':'middle',class:'cap'},sv);bars(0.4,f.a,f.x,f.b)}
+function reset(){k=0;custom=null;draw()}
+function next(){if(custom!==null){custom=null;draw();return true}if(k>=FR.length-1)return false;k++;draw();return true}
+$('u').oninput=e=>{ANIM.stop();custom=+e.target.value;$('uv').textContent=custom;draw()};
+setupPlayer({captureSeed:1,reset,next},1600);
+</script><a href="https://wikieden.github.io/ai-books/" style="position:fixed;right:12px;bottom:12px;z-index:99;padding:4px 10px;border-radius:14px;background:rgba(127,127,127,.18);color:inherit;font:13px/1.6 system-ui,sans-serif;text-decoration:none">← 全部讲义书</a>
+</body></html>

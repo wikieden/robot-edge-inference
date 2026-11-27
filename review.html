@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ai-infra-edge · 复习卡片 · AI Infra 扩展 · 机器人端侧推理</title>
+<script>(function(){try{var d=document.documentElement,t=localStorage.getItem("ab-theme"),f=localStorage.getItem("ab-fs");if(t)d.dataset.theme=t;if(f)d.dataset.fs=f}catch(e){}})();</script>
+<style>:root{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa;--fs:16px}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}}
+:root[data-theme="light"]{--bg:#fbfbfa;--fg:#1f2328;--mute:#5d6470;--line:#e3e5e8;--card:#fff;--acc:#2f6fdf;--code:#f2f3f5;--quote:#f4f6fa}
+:root[data-theme="dark"]{--bg:#15181d;--fg:#e4e7ec;--mute:#9aa3b2;--line:#2c323b;--card:#1c2026;--acc:#7aa7ff;--code:#22272f;--quote:#1b2029}
+:root[data-theme="sepia"]{--bg:#f6efe1;--fg:#3b3127;--mute:#7a6a58;--line:#e2d6bf;--card:#fbf6ec;--acc:#a0522d;--code:#ece2cd;--quote:#efe5d2}
+:root[data-theme="green"]{--bg:#e3eddf;--fg:#22301f;--mute:#566650;--line:#c9d8c3;--card:#eef5eb;--acc:#2e7d4f;--code:#d6e4d0;--quote:#dae7d5}
+:root[data-theme="navy"]{--bg:#0f1a2b;--fg:#dde6f3;--mute:#93a4bd;--line:#23324a;--card:#15233a;--acc:#6cc4ff;--code:#1a2a44;--quote:#16243b}
+:root[data-fs="s"]{--fs:15px}
+:root[data-fs="m"]{--fs:16px}
+:root[data-fs="l"]{--fs:18px}
+:root[data-fs="xl"]{--fs:20px}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:var(--fs)/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",sans-serif}
+a{color:var(--acc)}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header.top .in{max-width:860px;margin:0 auto;padding:10px 16px;display:flex;gap:6px 16px;align-items:center;flex-wrap:wrap;font-size:14px}
+header.top .brand{font-weight:600;color:var(--fg);text-decoration:none;margin-right:auto}
+header.top a{text-decoration:none}
+.prefs{display:inline-flex;gap:4px;align-items:center}
+.prefs button,.prefs select,#nav-toggle{font:inherit;font-size:13px;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;cursor:pointer}
+main{max-width:860px;margin:0 auto;padding:24px 16px 72px;overflow-wrap:anywhere}
+h1{font-size:1.75em;line-height:1.35;margin:8px 0 16px} h2{font-size:1.375em;margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--line)} h3{font-size:1.125em;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1180px;margin:0 auto}
+.layout main{margin:0;max-width:880px}
+nav.side{position:sticky;top:49px;align-self:start;max-height:calc(100vh - 49px);overflow-y:auto;padding:20px 8px 40px 16px;border-right:1px solid var(--line);font-size:14px;line-height:1.5}
+nav.side .h{font-weight:600;color:var(--mute);margin:4px 8px 8px;font-size:13px}
+nav.side a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.side a:hover{background:var(--code)} nav.side a.cur{background:var(--quote);color:var(--acc);font-weight:600}
+nav.side a .n{color:var(--mute);margin-right:6px;font-variant-numeric:tabular-nums}
+#nav-toggle{display:none}
+@media (max-width:960px){.layout{display:block} nav.side{display:none;position:fixed;z-index:6;top:49px;left:0;bottom:0;width:min(300px,85vw);max-height:none;background:var(--bg);box-shadow:2px 0 12px rgba(0,0,0,.2)} nav.side.open{display:block} #nav-toggle{display:inline-block}}
+.run{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin:4px 0 12px}
+.run details{flex-basis:100%;margin:6px 0 0;font-size:.94em}
+img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+blockquote{margin:16px 0;padding:10px 16px;background:var(--quote);border-left:3px solid var(--acc);border-radius:4px;color:var(--mute)}
+blockquote p{margin:4px 0}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto} pre code{padding:0;background:none}
+table{border-collapse:collapse;display:block;overflow-x:auto;max-width:100%;margin:12px 0;font-size:.94em}
+th,td{border:1px solid var(--line);padding:6px 10px;vertical-align:top} th{background:var(--code)}
+details{border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:8px 0;background:var(--card)}
+details[open]{padding-bottom:10px} summary{cursor:pointer;color:var(--acc);font-weight:500}
+mjx-container{overflow-x:auto;overflow-y:hidden;max-width:100%}
+.btn{display:inline-block;margin:4px 8px 4px 0;padding:6px 14px;border:1px solid var(--acc);border-radius:999px;text-decoration:none;font-size:14px}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none}
+.card:hover{border-color:var(--acc)} .card img{border:0;border-bottom:1px solid var(--line);border-radius:0;aspect-ratio:16/10;object-fit:contain;width:100%}
+.card .no{color:var(--mute);font-size:13px;padding:8px 12px 0} .card .t{padding:0 12px 12px;font-weight:500;line-height:1.5}
+.lead{font-size:1.06em;color:var(--mute)}
+footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-size:13px}
+</style>
+<script>window.MathJax={tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"],["$$","$$"]],processEscapes:true,processEnvironments:true}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head><body>
+<header class="top"><div class="in">
+<a class="brand" href="index.html">AI Infra 扩展 · 机器人端侧推理</a>
+<a href="lessons/index.html">讲义目录</a>
+<a href="animations/index.html">动画</a>
+<a href="review.html">复习卡片</a>
+<a href="lessons/appendix-glossary.html">缩写表</a>
+<a href="https://wikieden.github.io/ai-books/glossary.html">全局词汇</a>
+<a href="https://wikieden.github.io/ai-books/">← 全部讲义书</a>
+<span class="prefs" title="字号与主题"><button type="button" data-fs-step="-1" aria-label="字号变小">A−</button><button type="button" data-fs-step="1" aria-label="字号变大">A+</button><select id="ab-theme" aria-label="主题色"><option value="">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option><option value="sepia">米黄护眼</option><option value="green">豆沙绿护眼</option><option value="navy">夜蓝</option></select></span>
+</div></header>
+<main>
+<h1 id="ai-infra-edge">ai-infra-edge · 复习卡片</h1>
+<p>讲解中卡住、追问、答错的地方，以及必须记住的公式和数字，都会追加到这里。每张卡片的"来源"链接到 <a href="lessons/index.html">lessons/</a> 里对应的章节，忘了就回去重读那一章。</p>
+<p>现在的 16 张是编写讲义时放进来的"必须记住的公式和数字"，每章 2 张；做练习时卡住、答错的点会再补。</p>
+<h2 id="_1">怎么用</h2>
+<ol>
+<li>先只看<strong>问题</strong>，自己说出或写出答案；</li>
+<li>再点开"答案"核对；</li>
+<li>答对了，在"复习记录"里补一个日期；答错了就当天再看一遍。</li>
+</ol>
+<p><strong>复习间隔</strong>（按答对的次数）：第 1 次 → 隔 1 天 → 隔 3 天 → 隔 7 天 → 隔 14 天 → 隔 30 天。连续答对 5 次的卡片移到文末"已掌握"。</p>
+<p>想复习时说一声"复习"，我会挑到期的卡片来考你。</p>
+<hr />
+<h2 id="_2">约束与时限</h2>
+<h3 id="e01-50-hz-25">E01 · 控制 50 Hz、每执行 25 步推理一次，两次推理隔多久？推理频率是多少？</h3>
+<p>来源：<a href="lessons/01-robot-constraints.html">第 1 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>周期 = 1000 ÷ 50 = 20 ms；间隔 = 25 × 20 = 500 ms；推理频率 = 1000 ÷ 500 = 2 Hz。控制仍是 50 Hz，靠动作块（π0 一块 50 步）把两者接起来。</p>
+<p>口诀：动作成块换时间，块没用完就回来。</p>
+</details>
+<h3 id="e02-0-rtx-4090-ms">E02 · π0 在 RTX 4090 上一次推理多少 ms？分成哪三段？放到板外多多少？</h3>
+<p>来源：<a href="lessons/01-robot-constraints.html">第 1 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>板上 73 ms = 图像编码 14 ms + 观测前向 32 ms + 10 步 flow 动作 27 ms（π0 论文 Table I）。走 Wi‑Fi 放到板外再加 13 ms 网络，共 86 ms。</p>
+<p>口诀：十四三十二二十七，板上七十三。</p>
+</details>
+<h2 id="_3">芯片与下限</h2>
+<h3 id="e03-jetson-tops">E03 · Jetson 官方写的 TOPS 能直接用吗？要打哪几层折扣？</h3>
+<p>来源：<a href="lessons/02-edge-chips.html">第 2 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>不能。① Orin 的 TOPS 是 INT8 <strong>稀疏</strong>口径，先 ÷ 2 换成稠密（AGX Orin 275 → 137.5）；② 再乘实际利用率（要实测，比如 40% → 55）；③ 不同精度不能直接比：Thor 的 2070 是 FP4 稀疏 TFLOPS，不能和 Orin 的 INT8 TOPS 相除。比较板子时带宽口径一致，可以直接比。</p>
+<p>口诀：稀疏先除二，再乘利用率；精度不同不能比。</p>
+</details>
+<h3 id="e04">E04 · 给机器人挑计算板，先看哪三个数？为什么算力排在后面？</h3>
+<p>来源：<a href="lessons/02-edge-chips.html">第 2 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 内存容量（放不放得下，统一内存还要先扣系统预留）；② 内存带宽（batch = 1 时每步要读一遍权重，带宽决定最快多快）；③ 功率（电池和散热扛不扛得住）。算力排后面，是因为官方数字要打好几层折扣，而且逐步生成时往往被带宽先卡住。</p>
+<p>口诀：容量带宽加功率，挑板先看这三个。</p>
+</details>
+<h3 id="e05">E05 · 推理时间的两个下限公式是什么？实际时间和它们什么关系？</h3>
+<p>来源：<a href="lessons/03-lower-bounds.html">第 3 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(t_{\text{读}}\)</span> = 要读的字节 ÷ 内存带宽；<span class="arithmatex">\(t_{\text{算}}\)</span> = 运算量 ÷ 算力。实际时间不会快于两者中较大的那个，通常还要慢好几倍。例：OpenVLA 一步吐 7 个 token，在 4090 上下限 7 × 15 GB ÷ 1008 GB/s = 104 ms（9.6 Hz），实测约 6 Hz。</p>
+<p>口诀：搬砖砌墙看更慢，读算两限取其大。</p>
+</details>
+<h3 id="e06-prefill-decode-flow">E06 · prefill 和逐步生成（decode / flow 动作步）各被什么卡住？为什么？</h3>
+<p>来源：<a href="lessons/03-lower-bounds.html">第 3 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>prefill（π0 的 3 张图 + 文字，约 816 个 token）一次算很多 token，同一份权重被反复用，<strong>算力</strong>先满：运算量 ≈ 2 × 3B × 816 ≈ 4.9 万亿次，4090 上 46 ms，而读一遍权重只要 6 ms。逐步生成每步 token 很少，读一遍权重只做一点计算，<strong>带宽</strong>先满。</p>
+<p>口诀：前缀 token 多算力卡，逐个生成带宽卡。</p>
+</details>
+<h2 id="_4">量化与引擎</h2>
+<h3 id="e07-scale-int8-int4">E07 · 对称量化的 scale 怎么算？int8 和 int4 的最大整数分别是多少？</h3>
+<p>来源：<a href="lessons/04-quantization.html">第 4 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(\text{scale} = \max|x| \div q_{\max}\)</span>，<span class="arithmatex">\(q = \text{round}(x / \text{scale})\)</span>，还原 <span class="arithmatex">\(\hat x = q \times \text{scale}\)</span>。<span class="arithmatex">\(q_{\max} = 2^{b-1} - 1\)</span>：int8 是 127，int4 是 7。例：最大绝对值 0.9，int4 的 scale = 0.9 ÷ 7 ≈ 0.129，0.33 被对到 3 × 0.129 = 0.386。</p>
+<p>口诀：最大绝对除最大整，四舍五入对格子。</p>
+</details>
+<h3 id="e08-openvla-int8">E08 · OpenVLA 用 int8 为什么成功率反而掉了？给了什么教训？</h3>
+<p>来源：<a href="lessons/04-quantization.html">第 4 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>int8 实现多了量化 / 反量化的额外算子，推理反而变慢，A5000 上只有 1.2 Hz，动作节奏和训练数据不一样了，成功率 71.3% → 58.1%；int4 读的数据更少，抵消了开销，71.9%、7.0 GB。教训：量化要看实际速度和闭环任务成功率，不能只看省了多少内存。</p>
+<p>口诀：变慢一样会做坏，数值仿真加真机。</p>
+</details>
+<h3 id="e09-tensorrt">E09 · TensorRT 构建引擎时做哪三件事？引擎为什么不能拷到别的机器上用？</h3>
+<p>来源：<a href="lessons/05-inference-engines.html">第 5 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 合并相邻算子（融合）；② 在这块 GPU 上逐个试，给每层挑最快的 kernel；③ 定精度（FP16 / INT8 / FP8）。因为第 ②、③ 步是针对这块 GPU 和这个 TensorRT 版本做的，所以引擎和 GPU 型号、TensorRT 版本绑定，要在目标 Jetson 上构建，升级 JetPack 后要重建。</p>
+<p>口诀：合并挑核定精度，引擎认机不认人。</p>
+</details>
+<h3 id="e10-gr00t-2-jetson-thor-ms-ms">E10 · GR00T 2 在 Jetson Thor 上从多少 ms 削到多少 ms？哪一步省得最多？</h3>
+<p>来源：<a href="lessons/05-inference-engines.html">第 5 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>720.41 → 123.97 ms，快 5.81 倍（120 W 模式，G1 Turbo，白皮书 Fig. 19）。TensorRT 一步省 358.41 ms，占基线 49.8%，最大；CUDA Graph 在 TensorRT 之后只省 2.12 ms，因为 kernel 已经合并得很少了。</p>
+<p>口诀：TensorRT 砍一半，Graph 收尾剩不多。</p>
+</details>
+<h2 id="_5">调度、功耗与部署</h2>
+<h3 id="e11-h-5050-hzg-07-ms">E11 · 异步推理不断档的条件是什么？H = 50、50 Hz、g = 0.7 时推理要在多少 ms 内回来？</h3>
+<p>来源：<a href="lessons/06-realtime-scheduling.html">第 6 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(L \le g \times H \times \Delta t\)</span>：队列还剩 <span class="arithmatex">\(g\)</span> 成时发起推理，剩下的动作能撑 <span class="arithmatex">\(gH\Delta t\)</span>。<span class="arithmatex">\(0.7 \times 50 \times 20 = 700\)</span> ms。<span class="arithmatex">\(g = 0\)</span> 就是同步执行，必然停顿。</p>
+<p>口诀：异步剩 g 就发起，L 小于 g H 乘 Δt。</p>
+</details>
+<h3 id="e12-0-4090">E12 · 同步执行时机器人停着的比例怎么算？π0 在 4090 上是多少？</h3>
+<p>来源：<a href="lessons/06-realtime-scheduling.html">第 6 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p><span class="arithmatex">\(L \div (L + E \times \Delta t)\)</span>。π0：<span class="arithmatex">\(73 \div (73 + 25 \times 20) = 12.7\%\)</span>；推理变慢到 300 ms 时是 37.5%。停顿不只是慢，还会让动作节奏和训练数据不一样。</p>
+<p>口诀：同步做完停下等，推理越慢停越多。</p>
+</details>
+<h3 id="e13">E13 · 一次推理的能量和电池续航怎么算？</h3>
+<p>来源：<a href="lessons/07-power-and-cloud.html">第 7 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>能量 <span class="arithmatex">\(E = P \times t\)</span>：Thor 120 W × 0.124 s ≈ 14.9 J（按模式上限，偏大）。续航（h）= 电池（Wh）÷ 总功率（W）：480 Wh ÷ 60 W = 8 h；加上电机 300 W 后 480 ÷ 360 = 1.33 h。续航看总功率，不只看计算模组。</p>
+<p>口诀：能量等于功率乘时间，续航要算总功率。</p>
+</details>
+<h3 id="e14">E14 · 什么必须留在机器人上，什么可以上云？判断标准是什么？</h3>
+<p>来源：<a href="lessons/07-power-and-cloud.html">第 7 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>两条标准：断网时停了会不会出危险；时限有多紧。必须在机器人上：关节控制和急停、System 1 动作生成、断网兜底。可以上云（要有退路）：System 2 任务规划、大模型问答、日志和数据回流。板外推理平均只多十几 ms，但丢包会把 p99 拉到几百 ms，断网时根本回不来。</p>
+<p>口诀：危险紧的留身上，慢的上云带退路。</p>
+</details>
+<h3 id="e15-0-vla">E15 · π0 级 VLA 的推理下限分哪两段？各按什么算？</h3>
+<p>来源：<a href="lessons/08-case-study.html">第 8 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>① 前缀：算力受限，<span class="arithmatex">\(2NT \div (\text{稠密算力} \times \text{利用率})\)</span>，3B × 816 token；② 动作专家：带宽受限，10 步 × 0.6 GB ÷ 带宽。AGX Orin：88.7 + 29.3 = 118.0 ms；Thor：45.6 ms；Orin NX：215.5 ms。预算 500 ms ÷ 下限就是余量。</p>
+<p>口诀：前缀按算力，动作按带宽，加起来是下限。</p>
+</details>
+<h3 id="e16">E16 · 上车前的优化顺序是什么？为什么这样排？</h3>
+<p>来源：<a href="lessons/08-case-study.html">第 8 章</a> · 加入 2026-11-26 · 复习记录：</p>
+<details>
+<summary>答案</summary>
+<p>去掉重复计算 → TensorRT → CUDA Graph → 量化 → 减少 flow 步数 → 异步 + RTC。不改输出的先做（前三步输出应完全不变或只有数值误差），改输出的后做（量化、少步要过数值 → 仿真 → 真机三关），这样出了问题能定位是哪一步。</p>
+<p>口诀：不改输出的先做，改输出的要验收。</p>
+</details>
+<hr />
+<h2 id="_6">已掌握</h2>
+<p>（连续答对 5 次的卡片移到这里）</p>
+</main>
+<footer>来自个人学习仓库的对话讲义，含练习作答记录。源码：<a href="https://github.com/wikieden/robot-edge-inference">github.com/wikieden/robot-edge-inference</a>。更多讲义书：<a href="https://wikieden.github.io/ai-books/">Physical AI 0-1-♾️（合集）</a><br>联系与合作：<a href="mailto:wikieden@gmail.com">wikieden@gmail.com</a>（讲义勘误与建议、课程 / 企业内训、内容合作与转载授权）· 赞助请发邮件联系</footer>
+<script>(function(){var d=document.documentElement,K=["s","m","l","xl"];
+function save(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}}
+var s=document.getElementById("ab-theme");if(s){s.value=d.dataset.theme||"";s.onchange=function(){if(s.value)d.dataset.theme=s.value;else delete d.dataset.theme;save("ab-theme",s.value)}}
+document.querySelectorAll("[data-fs-step]").forEach(function(b){b.onclick=function(){var i=K.indexOf(d.dataset.fs||"m")+(+b.dataset.fsStep);i=Math.max(0,Math.min(K.length-1,i));d.dataset.fs=K[i];save("ab-fs",K[i])}});
+var nb=document.getElementById("nav-toggle"),side=document.querySelector("nav.side");if(nb&&side){nb.onclick=function(){side.classList.toggle("open")}}
+var cur=side&&side.querySelector(".cur");if(cur)cur.scrollIntoView({block:"center"});
+})();</script>
+</body></html>
