@@ -99,7 +99,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 <tr>
 <td>System 1 / System 2</td>
-<td>—</td>
+<td>系统 1 / 系统 2</td>
 <td>GR00T N1 的叫法：System 2 慢，看图想事；System 1 快，出动作</td>
 <td><a href="../lessons/01-robot-constraints.html">第 1 章</a></td>
 </tr>
@@ -306,8 +306,8 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 <tr>
 <td>INT8 / INT4</td>
-<td>8 / 4-bit integer</td>
 <td>8 / 4 位整数</td>
+<td>8 / 4 位整数（int8 / int4 同义）</td>
 <td><a href="../lessons/02-edge-chips.html">第 2 章</a></td>
 </tr>
 <tr>
@@ -421,7 +421,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 <tr>
 <td>prefill / decode</td>
-<td>预填充（输入一次算完）/ 解码（一个一个往外吐 token）</td>
+<td>一次处理整段 prompt / 一次生成一个 token</td>
 <td><a href="../lessons/03-lower-bounds.html">第 3 章</a></td>
 </tr>
 <tr>
@@ -431,7 +431,7 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 <tr>
 <td>kernel / launch</td>
-<td>GPU 上的一个小程序 / CPU 提交一次 kernel</td>
+<td>GPU 上跑的一个函数 / CPU 把它挂进队列</td>
 <td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
 </tr>
 <tr>
@@ -441,12 +441,12 @@ footer{max-width:860px;margin:0 auto;padding:0 16px 40px;color:var(--mute);font-
 </tr>
 <tr>
 <td>融合（fusion）</td>
-<td>把相邻算子合成一个 kernel，中间结果不写回内存</td>
+<td>把多个算子合成一个 kernel，中间结果不落显存</td>
 <td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
 </tr>
 <tr>
 <td>CUDA Graph</td>
-<td>把一整步的 kernel 录下来，以后一次提交</td>
+<td>把一串 kernel 录成一张图，一次 launch 重放</td>
 <td><a href="../lessons/05-inference-engines.html">第 5 章</a></td>
 </tr>
 <tr>
